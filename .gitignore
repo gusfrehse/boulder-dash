@@ -1,0 +1,4 @@
+*.o
+jogo
+compile_commands.json
+.cache
