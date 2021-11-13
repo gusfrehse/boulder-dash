@@ -13,14 +13,14 @@ static int clamp(int val, int min, int max) {
   return val;
 }
 
-camera create_camera(int x, int y, int width, int height, float zoom, int tile_size) {
+camera create_camera(int x, int y, int width, int height, float zoom, int texture_size) {
 	camera cam;
 	cam.pos_x = x;
 	cam.pos_y = y;
 	cam.width = width;
 	cam.height = height;
 	cam.zoom = zoom;
-	cam.tile_size = tile_size;
+	cam.texture_size = texture_size;
 	return cam;
 }
 
@@ -31,17 +31,23 @@ void update_camera(int x, int y, camera *cam) {
 
 void render_camera(ALLEGRO_BITMAP *textures[], map m, camera cam) {
   al_clear_to_color(al_map_rgb(0, 0, 0));
+  
   // Improves performance by sending the atlas texture only once per frame.
   al_hold_bitmap_drawing(true);
 
 	int map_x, map_y;
-
+	
+	int draw_size = (int) (cam.zoom * cam.texture_size);
+	
 	// in pixels
-	int center_x = (cam.width / 2) - (cam.tile_size / 2);
-	int center_y = (cam.height / 2) - (cam.tile_size / 2);
+	int center_x = (cam.width / 2) - (draw_size / 2);
+	int center_y = (cam.height / 2) - (draw_size / 2);
+	
+	int number_blocks_h = 1 + center_x / draw_size;
+	int number_blocks_v = 1 + center_y / draw_size;
 
-	for (int dy = -3; dy <= 3; dy++) {
-		for (int dx = -3; dx <= 3; dx++) {
+	for (int dy = -number_blocks_v; dy <= number_blocks_v; dy++) {
+		for (int dx = -number_blocks_h; dx <= number_blocks_h; dx++) {
 			map_x = clamp(cam.pos_x + dx, 0, m.width - 1);
 			map_y = clamp(cam.pos_y + dy, 0, m.height - 1);
 
@@ -49,11 +55,11 @@ void render_camera(ALLEGRO_BITMAP *textures[], map m, camera cam) {
 			ALLEGRO_BITMAP *bitmap = textures[type];
 
 			al_draw_scaled_bitmap(bitmap,
-					0, 0,														// source x/y
-					cam.tile_size, cam.tile_size,		// source w/h
-					center_x + dx * cam.tile_size,	// destination x
-					center_y + dy * cam.tile_size,	// destination y
-					cam.tile_size, cam.tile_size,		// destination w/h
+					0, 0,								// source x/y
+					cam.texture_size, cam.texture_size,	// source w/h
+					center_x + dx * draw_size,			// destination x
+					center_y + dy * draw_size,			// destination y
+					draw_size, draw_size,				// destination w/h
 					0);
 		}
 	}
@@ -63,4 +69,3 @@ void render_camera(ALLEGRO_BITMAP *textures[], map m, camera cam) {
 
   al_flip_display();
 }
-

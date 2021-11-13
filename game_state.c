@@ -31,8 +31,7 @@ static ALLEGRO_BITMAP *load_sub_texture(game_state *game, block_type b) {
   int x = TEXTURE_SIZE * (b % ATLAS_TEXTURE_W);
   int y = TEXTURE_SIZE * (b / ATLAS_TEXTURE_W);
 
-  texture = al_create_sub_bitmap(game->texture_atlas, x, y, TEXTURE_SIZE,
-                                 TEXTURE_SIZE);
+  texture = al_create_sub_bitmap(game->texture_atlas, x, y, TEXTURE_SIZE, TEXTURE_SIZE);
 
   if (!texture) {
     fprintf(stderr, "ERROR: Could not load sub texture '%s'", block_name(b));
@@ -59,12 +58,9 @@ void init_game(game_state *game, int width, int height, float zoom,
 
   // TODO: These also should be moved to somewhere else.
   al_register_event_source(game->queue, al_get_keyboard_event_source());
-  al_register_event_source(game->queue,
-                           al_get_display_event_source(game->display));
-  al_register_event_source(game->queue,
-                           al_get_timer_event_source(game->update_timer));
-  al_register_event_source(game->queue,
-                           al_get_timer_event_source(game->render_timer));
+  al_register_event_source(game->queue, al_get_display_event_source(game->display));
+  al_register_event_source(game->queue, al_get_timer_event_source(game->update_timer));
+  al_register_event_source(game->queue, al_get_timer_event_source(game->render_timer));
 
   // Create board
   FILE *map1 = fopen("level1.map", "r");
@@ -86,7 +82,7 @@ void init_game(game_state *game, int width, int height, float zoom,
   game->textures[STEEL] = load_sub_texture(game, STEEL);
 
 	// Rendering thing
-	game->cam = create_camera(0, 0, width, height, 1.0f, TEXTURE_SIZE);
+	game->cam = create_camera(0, 0, width, height, 0.5f, TEXTURE_SIZE);
 }
 
 void destroy_game(game_state *game) {

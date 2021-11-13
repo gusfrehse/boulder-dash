@@ -15,11 +15,11 @@ typedef struct {
 	/// Magnification, increase it to increase the size of the blocks.
 	float zoom;
 
-	int tile_size;
+	int texture_size;
 } camera;
 
 
-camera create_camera(int x, int y, int width, int height, float zoom, int tile_size);
+camera create_camera(int x, int y, int width, int height, float zoom, int texture_size);
 void update_camera(int x, int y, camera *camera);
 void render_camera(ALLEGRO_BITMAP *textures[], map m, camera camera);
 
