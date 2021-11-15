@@ -207,16 +207,14 @@ block_type get_block_type(int x, int y, map m) {
 void move_rockford(int x_amount, int y_amount, map *m) {
   int destx = m->rockford_x + x_amount;
   int desty = m->rockford_y + y_amount;
-  switch (get_block_type(destx, desty, *m)) {
-  case DIRT:
-  case AIR:
+  
+  if (get_block_property(destx, desty, IS_DIGGABLE, *m) ||
+      !get_block_property(destx, desty, IT_COLLIDES, *m)) {
     set_block_at(m->rockford_x, m->rockford_y, AIR, *m);
-    set_block_at(m->rockford_x + x_amount, m->rockford_y + y_amount, ROCKFORD,
-                 *m);
+    set_block_at(m->rockford_x + x_amount, m->rockford_y + y_amount, ROCKFORD, *m);
     m->rockford_x += x_amount;
     m->rockford_y += y_amount;
-    break;
-  default:
-    break;
+  } else if (get_block_property(destx, desty, IS_PUSHABLE, *m)) {
+    // TODO : if next block not collides push the block, maybe add random so it seems difficult to push.
   }
 }

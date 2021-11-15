@@ -10,10 +10,6 @@
 #include "map.h"
 #include "camera.h"
 
-#define ATLAS_TEXTURE_W 3 // Number of sprites in a line of the atlas
-#define ATLAS_TEXTURE_H 3 // Number of sprites in a column of the atlas
-
-#define TEXTURE_SIZE 100
 
 typedef struct game_state {
 	ALLEGRO_DISPLAY *display;
@@ -25,12 +21,15 @@ typedef struct game_state {
 	ALLEGRO_BITMAP *textures[NUM_BLOCKS];
 
 	int should_quit;
+	
+	int atlas_width, atlas_height;
+	int texture_size;
 
 	camera cam;
 	map curr_map;
 } game_state;
 
-void init_game(game_state *game, int width, int height, float zoom, char *level_path);
+void init_game(game_state *game, int width, int height, float zoom, int atlas_width, int atlas_height, int texture_size, char *level_path);
 void destroy_game(game_state *game);
 
 void render_game(game_state *game);

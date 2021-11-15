@@ -11,15 +11,19 @@
 #include "stopwatch.h"
 #include "camera.h"
 
-#define WIDTH 1280
-#define HEIGHT 720
+#define WIDTH 1024
+#define HEIGHT 576
 #define ZOOM (1.0f)
+
+#define ATLAS_TEXTURE_W 3 // Number of sprites in a line of the atlas
+#define ATLAS_TEXTURE_H 3 // Number of sprites in a column of the atlas
+#define TEXTURE_SIZE 100 // Number of pixels in one side of a texture
 
 int main(void) {
   ALLEGRO_EVENT event;
 
   game_state game;
-  init_game(&game, WIDTH, HEIGHT, ZOOM, "path/to/file");
+  init_game(&game, WIDTH, HEIGHT, ZOOM, ATLAS_TEXTURE_W, ATLAS_TEXTURE_H, TEXTURE_SIZE, "path/to/file");
 
   input_controller controller;
 	reset_input(&controller);
@@ -39,7 +43,7 @@ int main(void) {
 			if (event.timer.source == game.render_timer) {
 				//struct timespec t = timer_start();
 				//render_game(&game);
-				render_camera(game.textures, game.curr_map, game.cam);
+				render_camera(game.textures, TEXTURE_SIZE, game.curr_map, game.cam);
 				//long long time = timer_end(t);
 				//fprintf(stderr, "DEBUG: Render time %f s\n", (double)time * 1e-9);
 			} else if (event.timer.source == game.update_timer) {

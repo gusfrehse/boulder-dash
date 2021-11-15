@@ -13,23 +13,24 @@ static int clamp(int val, int min, int max) {
   return val;
 }
 
-camera create_camera(int x, int y, int width, int height, float zoom, int texture_size) {
+camera create_camera(int x, int y, int width, int height, int offset_x, int offset_y, float zoom) {
 	camera cam;
 	cam.pos_x = x;
 	cam.pos_y = y;
 	cam.width = width;
 	cam.height = height;
+	cam.offset_x = offset_x;
+	cam.offset_y = offset_y;
 	cam.zoom = zoom;
-	cam.texture_size = texture_size;
 	return cam;
 }
 
-void update_camera(int x, int y, camera *cam) {
+void update_camera(int x, int y, float zoom, camera *cam) {
 	cam->pos_x = x;
 	cam->pos_y = y;
 }
 
-void render_camera(ALLEGRO_BITMAP *textures[], map m, camera cam) {
+void render_camera(ALLEGRO_BITMAP *textures[], int texture_size, map m, camera cam) {
   al_clear_to_color(al_map_rgb(0, 0, 0));
   
   // Improves performance by sending the atlas texture only once per frame.
@@ -37,9 +38,10 @@ void render_camera(ALLEGRO_BITMAP *textures[], map m, camera cam) {
 
 	int map_x, map_y;
 	
-	int draw_size = (int) (cam.zoom * cam.texture_size);
+	// size that each texture will be drawn, in pixels
+	int draw_size = (int) (cam.zoom * texture_size);
 	
-	// in pixels
+	// center of the viewport, in pixels
 	int center_x = (cam.width / 2) - (draw_size / 2);
 	int center_y = (cam.height / 2) - (draw_size / 2);
 	
@@ -56,9 +58,9 @@ void render_camera(ALLEGRO_BITMAP *textures[], map m, camera cam) {
 
 			al_draw_scaled_bitmap(bitmap,
 					0, 0,								// source x/y
-					cam.texture_size, cam.texture_size,	// source w/h
-					center_x + dx * draw_size,			// destination x
-					center_y + dy * draw_size,			// destination y
+					texture_size, texture_size,			// source w/h
+					cam.offset_x + center_x + dx * draw_size,		// destination x
+					cam.offset_y + center_y + dy * draw_size,	// destination y
 					draw_size, draw_size,				// destination w/h
 					0);
 		}

@@ -14,36 +14,13 @@
 #include "map.h"
 #include "camera.h"
 
-static ALLEGRO_BITMAP *load_texture(char *path) {
-  ALLEGRO_BITMAP *texture = al_load_bitmap(path);
-  if (!texture) {
-    fprintf(stderr, "ERROR: Could not load texture '%s'", path);
-    exit(1);
-  }
+static ALLEGRO_BITMAP *load_texture(char *path);
+static ALLEGRO_BITMAP *load_sub_texture(game_state *game, block_type b);
 
-  fprintf(stderr, "Loaded texture %s\n", path);
-
-  return texture;
-}
-
-static ALLEGRO_BITMAP *load_sub_texture(game_state *game, block_type b) {
-  ALLEGRO_BITMAP *texture;
-  int x = TEXTURE_SIZE * (b % ATLAS_TEXTURE_W);
-  int y = TEXTURE_SIZE * (b / ATLAS_TEXTURE_W);
-
-  texture = al_create_sub_bitmap(game->texture_atlas, x, y, TEXTURE_SIZE, TEXTURE_SIZE);
-
-  if (!texture) {
-    fprintf(stderr, "ERROR: Could not load sub texture '%s'", block_name(b));
-    exit(1);
-  }
-
-  fprintf(stderr, "Loaded sub texture %s\n", block_name(b));
-
-  return texture;
-}
 void init_game(game_state *game, int width, int height, float zoom,
-               char *level_path) {
+               int atlas_width, int atlas_height, int texture_size,
+			   char *level_path)
+{
   // TODO: These should be moved somewhere else.
   al_init();
   al_install_keyboard();
@@ -58,9 +35,12 @@ void init_game(game_state *game, int width, int height, float zoom,
 
   // TODO: These also should be moved to somewhere else.
   al_register_event_source(game->queue, al_get_keyboard_event_source());
-  al_register_event_source(game->queue, al_get_display_event_source(game->display));
-  al_register_event_source(game->queue, al_get_timer_event_source(game->update_timer));
-  al_register_event_source(game->queue, al_get_timer_event_source(game->render_timer));
+  al_register_event_source(game->queue,
+		  al_get_display_event_source(game->display));
+  al_register_event_source(game->queue,
+		  al_get_timer_event_source(game->update_timer));
+  al_register_event_source(game->queue,
+		  al_get_timer_event_source(game->render_timer));
 
   // Create board
   FILE *map1 = fopen("level1.map", "r");
@@ -72,7 +52,12 @@ void init_game(game_state *game, int width, int height, float zoom,
   fclose(map1);
 
   // Load textures
+  game->atlas_height = atlas_height;
+  game->atlas_width = atlas_width;
+  game->texture_size = texture_size;
+
   game->texture_atlas = load_texture("./resources/atlas.png");
+
   game->textures[DIRT] = load_sub_texture(game, DIRT);
   game->textures[ROCK] = load_sub_texture(game, ROCK);
   game->textures[ROCKFORD] = load_sub_texture(game, ROCKFORD);
@@ -82,7 +67,7 @@ void init_game(game_state *game, int width, int height, float zoom,
   game->textures[STEEL] = load_sub_texture(game, STEEL);
 
 	// Rendering thing
-	game->cam = create_camera(0, 0, width, height, 0.5f, TEXTURE_SIZE);
+  game->cam = create_camera(0, 0, width, height, 0, 0, 0.4f);
 }
 
 void destroy_game(game_state *game) {
@@ -159,47 +144,6 @@ void update_physics(game_state *game) {
   }
 }
 
-
-//void render_game(game_state *game) {
-//  al_clear_to_color(al_map_rgb(0, 0, 0));
-//  // Improves performance by sending the atlas texture only once per frame.
-//  al_hold_bitmap_drawing(true);
-//
-//	int map_x, map_y;
-//
-//	// in blocks
-//	int cam_x = game->curr_map.rockford_x;
-//	int cam_y = game->curr_map.rockford_y;
-//
-//	// in pixels
-//	int center_x = (game->width / 2) - (game->tile_size / 2);
-//	int center_y = (game->height / 2) - (game->tile_size / 2);
-//
-//	for (int dy = -3; dy <= 3; dy++) {
-//		for (int dx = -3; dx <= 3; dx++) {
-//			printf("drawing at %d %d\n", center_x + dx, center_y + dy);
-//
-//			map_x = clamp(cam_x + dx, 0, game->curr_map.width - 1);
-//			map_y = clamp(cam_y + dy, 0, game->curr_map.height - 1);
-//
-//			block_type type = get_block_type(map_x, map_y, game->curr_map);
-//			ALLEGRO_BITMAP *bitmap = game->textures[type];
-//
-//			al_draw_scaled_bitmap(bitmap,
-//					0, 0,																// source x/y
-//					game->tile_size, game->tile_size,		// source w/h
-//					center_x + dx * game->tile_size, center_y + dy * game->tile_size,				// destination x/y
-//					game->tile_size, game->tile_size,		// destinhation w/h
-//					0);
-//		}
-//	}
-//
-//  // Actually draw to the screen.
-//  al_hold_bitmap_drawing(false);
-//
-//  al_flip_display();
-//}
-
 void update_game(input_controller *c, game_state *game) {
   if (c->key[ALLEGRO_KEY_ESCAPE])
     game->should_quit = 1;
@@ -214,5 +158,40 @@ void update_game(input_controller *c, game_state *game) {
         ((c->key[ALLEGRO_KEY_S]) ? 1 : 0) - ((c->key[ALLEGRO_KEY_W]) ? 1 : 0);
 
   move_rockford(h_movement, v_movement, &game->curr_map);
-	update_camera(game->curr_map.rockford_x, game->curr_map.rockford_y, &game->cam);
+  update_camera(game->curr_map.rockford_x, game->curr_map.rockford_y,
+		  game->cam.zoom, &game->cam);
+}
+
+static ALLEGRO_BITMAP *load_texture(char *path)
+{
+  ALLEGRO_BITMAP *texture = al_load_bitmap(path);
+  if (!texture)
+  {
+    fprintf(stderr, "ERROR: Could not load texture '%s'", path);
+    exit(1);
+  }
+
+  fprintf(stderr, "Loaded texture %s\n", path);
+
+  return texture;
+}
+
+static ALLEGRO_BITMAP *load_sub_texture(game_state *game, block_type b)
+{
+  ALLEGRO_BITMAP *texture;
+  int x = game->texture_size * (b % game->atlas_width);
+  int y = game->texture_size * (b / game->atlas_width);
+
+  texture = al_create_sub_bitmap(game->texture_atlas, x, y, game->texture_size,
+		  game->texture_size);
+
+  if (!texture)
+  {
+    fprintf(stderr, "ERROR: Could not load sub texture '%s'", block_name(b));
+    exit(1);
+  }
+
+  fprintf(stderr, "Loaded sub texture %s\n", block_name(b));
+
+  return texture;
 }
