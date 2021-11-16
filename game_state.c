@@ -65,6 +65,7 @@ void init_game(game_state *game, int width, int height, float zoom,
   game->textures[AIR] = load_sub_texture(game, AIR);
   game->textures[BRICK] = load_sub_texture(game, BRICK);
   game->textures[STEEL] = load_sub_texture(game, STEEL);
+  game->textures[DUST] = load_sub_texture(game, DUST);
 
 	// Rendering thing
   game->cam = create_camera(0, 0, width, height, 0, 0, 0.4f);
@@ -79,23 +80,42 @@ void destroy_game(game_state *game) {
   al_destroy_event_queue(game->queue);
 }
 
+static void kill_rockford(game_state *game) {
+	explode_at(game->curr_map.rockford_x, game->curr_map.rockford_y, game->curr_map);
+	// TODO:
+	// end_game(game->g);
+}
+
 static void apply_physics(int x, int y, game_state *game) {
   // If rock over rock -> rock over falls if possible
   // If rock over dirt -> rock stays
   // If rock over air -> rock moves down
   // If rock over rockford -> if rock in already in movement -> rockford dies ->
   // else -> rock stays
+	
+  // If we already changed current this frame we don't change it again.
+  if (get_block_property(x, y, HAS_CHANGED, game->curr_map)) {
+    return;
+  }
+
+	if (get_block_property(x, y, DOES_VANISH, game->curr_map)) {
+		set_block_at(x, y, AIR, game->curr_map);
+		set_block_property(x, y, HAS_CHANGED, game->curr_map);
+		return;
+	}
 
   // We only change blocks that have gravity.
   if (!get_block_property(x, y, HAS_GRAVITY, game->curr_map)) {
     return;
   }
-  // write_block(stderr, x, y, game->curr_map);
 
-  // If we already changed current this frame we don't change it again.
-  if (get_block_property(x, y, HAS_CHANGED, game->curr_map)) {
-    return;
-  }
+	if (game->curr_map.rockford_x == x &&
+			game->curr_map.rockford_y == y + 1 &&
+			get_block_property(x, y, IN_MOVEMENT, game->curr_map)) {
+		// Rockford is below and the current block is going to kill him :(
+		kill_rockford(game);
+		return;
+	}
 
   // If below don't collides we can move current down
   if (!get_block_property(x, y + 1, IT_COLLIDES, game->curr_map)) {
@@ -128,6 +148,7 @@ static void apply_physics(int x, int y, game_state *game) {
     return;
   }
 }
+
 void update_physics(game_state *game) {
   // We make the restriction that every map has a border of steel,
   // which don't need to be updated.

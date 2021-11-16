@@ -13,6 +13,7 @@ char *block_name(block_type b) {
   case AIR: return "AIR";
   case BRICK: return "BRICK";
   case STEEL: return "STEEL";
+  case DUST: return "DUST";
   case NUM_BLOCKS: return "NUM_BLOCKS";
   }
   return "NOT A BLOCK";
@@ -41,6 +42,12 @@ void write_block(FILE *f, int x, int y, map m) {
 
   if (get_block_property(x, y, HAS_CHANGED, m))
     fprintf(f, "\tHAS_CHANGED\n");
+
+	if (get_block_property(x, y, UNBREAKABLE, m))
+    fprintf(f, "\tUNBREAKABLE\n");
+
+	if (get_block_property(x, y, DOES_VANISH, m))
+    fprintf(f, "\tDOES_VANISH\n");
 }
 
 /**
@@ -81,7 +88,10 @@ block create_block(block_type type) {
     b.properties |= IT_COLLIDES;
     break;
   case STEEL:
-    b.properties |= IT_COLLIDES | IS_UNSTABLE;
+    b.properties |= IT_COLLIDES | IS_UNSTABLE | UNBREAKABLE;
+    break;
+  case DUST:
+    b.properties |= IT_COLLIDES | IS_DIGGABLE | DOES_VANISH;
     break;
   default:
     fprintf(stderr, "ERROR: received weird block type \"%s\"\n",
@@ -145,6 +155,9 @@ map map_from_string(char *map_str) {
       case '%':
         m.board[y * m.width + x] = create_block(STEEL);
         break;
+      case '@':
+        m.board[y * m.width + x] = create_block(DUST);
+        break;
       default:
         fprintf(stderr, "Unexpected '%c' (0x%x) while reading a map.\n", c, c);
       }
@@ -170,6 +183,8 @@ static char block_char(block_type b) {
     return '#';
   case STEEL:
     return '%';
+  case DUST:
+    return '@';
   default:
     return '?';
   }
@@ -217,4 +232,15 @@ void move_rockford(int x_amount, int y_amount, map *m) {
   } else if (get_block_property(destx, desty, IS_PUSHABLE, *m)) {
     // TODO : if next block not collides push the block, maybe add random so it seems difficult to push.
   }
+}
+
+void explode_at(int x, int y, map m) {
+	for (int dx = -1; dx <= 1; dx++) {
+		for (int dy = -1; dy <= 1; dy++) {
+			if (!get_block_property(x + dx, y + dy, UNBREAKABLE, m)) {
+				set_block_at(x + dx, y + dy, DUST, m);
+				set_block_property(x + dx, y + dy, HAS_CHANGED, m);
+			}
+		}
+	}
 }

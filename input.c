@@ -12,6 +12,7 @@
 void reset_input(input_controller *c) {
 	memset(c->key, 0, sizeof(c->key));
 }
+
 void process_input(input_controller *c, ALLEGRO_EVENT e) {
   switch (e.type) {
   case ALLEGRO_EVENT_KEY_DOWN:
