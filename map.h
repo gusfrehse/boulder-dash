@@ -40,6 +40,7 @@ typedef struct {
 	block *board;
 	int width, height;
 	int rockford_x, rockford_y;
+	int needed_diamonds;
 } map;
 
 block create_block(block_type type);
@@ -58,8 +59,6 @@ void unset_block_property(int x, int y, block_property p, map m);
 int get_block_property(int x, int y, block_property p, map m);
 
 block_type get_block_type(int x, int y, map m);
-
-void move_rockford(int x_amount, int y_amount, map *m);
 
 void explode_at(int x, int y, map m);
 

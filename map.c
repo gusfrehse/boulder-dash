@@ -144,6 +144,7 @@ map map_from_string(char *map_str) {
         m.rockford_y = y;
         break;
       case '*':
+		m.needed_diamonds++; // count the amount of diamonds
         m.board[y * m.width + x] = create_block(DIAMOND);
         break;
       case ' ':
@@ -217,21 +218,6 @@ int get_block_property(int x, int y, block_property p, map m) {
 
 block_type get_block_type(int x, int y, map m) {
   return m.board[y * m.width + x].type;
-}
-
-void move_rockford(int x_amount, int y_amount, map *m) {
-  int destx = m->rockford_x + x_amount;
-  int desty = m->rockford_y + y_amount;
-  
-  if (get_block_property(destx, desty, IS_DIGGABLE, *m) ||
-      !get_block_property(destx, desty, IT_COLLIDES, *m)) {
-    set_block_at(m->rockford_x, m->rockford_y, AIR, *m);
-    set_block_at(m->rockford_x + x_amount, m->rockford_y + y_amount, ROCKFORD, *m);
-    m->rockford_x += x_amount;
-    m->rockford_y += y_amount;
-  } else if (get_block_property(destx, desty, IS_PUSHABLE, *m)) {
-    // TODO : if next block not collides push the block, maybe add random so it seems difficult to push.
-  }
 }
 
 void explode_at(int x, int y, map m) {

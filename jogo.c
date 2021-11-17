@@ -20,19 +20,19 @@
 #define TEXTURE_SIZE 100 // Number of pixels in one side of a texture
 
 int main(void) {
-  ALLEGRO_EVENT event;
+	ALLEGRO_EVENT event;
 
-  game_state game;
-  init_game(&game, WIDTH, HEIGHT, ZOOM, ATLAS_TEXTURE_W, ATLAS_TEXTURE_H, TEXTURE_SIZE, "path/to/file");
+	game_state game;
+	init_game(&game, WIDTH, HEIGHT, ZOOM, ATLAS_TEXTURE_W, ATLAS_TEXTURE_H, TEXTURE_SIZE, "path/to/file");
 
-  input_controller controller;
+	input_controller controller;
 	reset_input(&controller);
 
-  al_start_timer(game.render_timer);
-  al_start_timer(game.update_timer);
+	al_start_timer(game.render_timer);
+	al_start_timer(game.update_timer);
 
-  while (!game.should_quit) {
-    al_wait_for_event(game.queue, &event);
+	while (!game.should_quit) {
+		al_wait_for_event(game.queue, &event);
 
 		switch (event.type) {
 		case ALLEGRO_EVENT_KEY_DOWN:
@@ -44,25 +44,27 @@ int main(void) {
 				//struct timespec t = timer_start();
 				//render_game(&game);
 				render_camera(game.textures, TEXTURE_SIZE, game.curr_map, game.cam);
+				render_status_bar(&game);
+				al_flip_display();
 				//long long time = timer_end(t);
 				//fprintf(stderr, "DEBUG: Render time %f s\n", (double)time * 1e-9);
 			} else if (event.timer.source == game.update_timer) {
 				//struct timespec t = timer_start();
 				update_physics(&game);
-				update_game(&controller, &game);
 				update_input(&controller);
+				update_game(&controller, &game);
 				//long long time = timer_end(t);
 				//fprintf(stderr, "DEBUG: Update time %f s\n", (double)time * 1e-9);
 			}
 			break;
 		case ALLEGRO_EVENT_DISPLAY_CLOSE:
-			fprintf(stderr, "DEBUG: Closing time!\n");
-			game.should_quit = 1;
-			break;
-		}
-  }
+				fprintf(stderr, "DEBUG: Closing time!\n");
+				game.should_quit = 1;
+				break;
+			}
+	}
 
 	destroy_game(&game);
 
-  return 0;
+	return 0;
 }

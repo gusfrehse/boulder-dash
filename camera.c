@@ -31,10 +31,10 @@ void update_camera(int x, int y, float zoom, camera *cam) {
 }
 
 void render_camera(ALLEGRO_BITMAP *textures[], int texture_size, map m, camera cam) {
-  al_clear_to_color(al_map_rgb(0, 0, 0));
+	al_clear_to_color(al_map_rgb(0, 0, 0));
   
-  // Improves performance by sending the atlas texture only once per frame.
-  al_hold_bitmap_drawing(true);
+	// Improves performance by sending the atlas texture only once per frame.
+	al_hold_bitmap_drawing(true);
 
 	int map_x, map_y;
 	
@@ -68,6 +68,4 @@ void render_camera(ALLEGRO_BITMAP *textures[], int texture_size, map m, camera c
 
   // Actually draw to the screen.
   al_hold_bitmap_drawing(false);
-
-  al_flip_display();
 }
