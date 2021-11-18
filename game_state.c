@@ -182,8 +182,6 @@ static void apply_physics(int x, int y, game_state *game) {
 }
 
 void update_physics(game_state *game) {
-	// We make the restriction that every map has a border of steel,
-	// which don't need to be updated.
 	for (int x = 1; x < game->curr_map.width - 1; x++) {
 		for (int y = 1; y < game->curr_map.height - 1; y++) {
 			apply_physics(x, y, game);

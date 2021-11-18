@@ -6,16 +6,6 @@
 
 #include "map.h"
 
-static int clamp(int val, int min, int max) {
-  if (val < min)
-    return min;
-
-  if (val > max)
-    return max;
-
-  return val;
-}
-
 camera create_camera(int x, int y, int width, int height, int offset_x, int offset_y, float zoom) {
 	camera cam;
 	cam.pos_x = x;
