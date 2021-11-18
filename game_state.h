@@ -27,13 +27,13 @@ typedef struct game_state {
 
 	camera cam;
 	map curr_map;
+	map clean_map;
 
 	int status_bar_height;
 	int curr_score;
 	int curr_diamonds;
 	int curr_lives;
 	double level_start_time;
-	// TODO: init this
 } game_state;
 
 void init_game(game_state *game, int width, int height, float zoom, int atlas_width, int atlas_height, int texture_size, char *level_path);
