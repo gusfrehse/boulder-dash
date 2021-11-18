@@ -51,6 +51,7 @@ map map_from_file(FILE* f);
 map map_from_string(char * map_str);
 
 void write_map(FILE* f, map m);
+void copy_map(map *dest, map *source);
 
 void set_block_at(int x, int y, block_type val, map m);
 

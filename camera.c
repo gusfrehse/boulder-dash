@@ -1,6 +1,9 @@
 #include "camera.h"
 
+#include <allegro5/allegro_primitives.h>
+#include <math.h>
 #include <allegro5/allegro5.h>
+
 #include "map.h"
 
 static int clamp(int val, int min, int max) {
@@ -25,47 +28,54 @@ camera create_camera(int x, int y, int width, int height, int offset_x, int offs
 	return cam;
 }
 
-void update_camera(int x, int y, float zoom, camera *cam) {
-	cam->pos_x = x;
-	cam->pos_y = y;
+float lerp(float start, float end, float t) {
+	return start * (1 - t) + end * t;
 }
 
-void render_camera(ALLEGRO_BITMAP *textures[], int texture_size, map m, camera cam) {
+void update_camera(int x, int y, float zoom, camera *cam) {
+	float speed = 0.1f;
+	cam->pos_x = (lerp(cam->pos_x, x, speed));
+	cam->pos_y = (lerp(cam->pos_y, y, speed));
+}
+
+void render_camera(ALLEGRO_BITMAP *textures[], float texture_size, map m, camera cam) {
 	al_clear_to_color(al_map_rgb(0, 0, 0));
   
 	// Improves performance by sending the atlas texture only once per frame.
 	al_hold_bitmap_drawing(true);
 
-	int map_x, map_y;
-	
-	// size that each texture will be drawn, in pixels
-	int draw_size = (int) (cam.zoom * texture_size);
-	
-	// center of the viewport, in pixels
-	int center_x = (cam.width / 2) - (draw_size / 2);
-	int center_y = (cam.height / 2) - (draw_size / 2);
-	
-	int number_blocks_h = 1 + center_x / draw_size;
-	int number_blocks_v = 1 + center_y / draw_size;
+	ALLEGRO_TRANSFORM original, current;
 
-	for (int dy = -number_blocks_v; dy <= number_blocks_v; dy++) {
-		for (int dx = -number_blocks_h; dx <= number_blocks_h; dx++) {
-			map_x = clamp(cam.pos_x + dx, 0, m.width - 1);
-			map_y = clamp(cam.pos_y + dy, 0, m.height - 1);
+	// Backup the original transform
+	al_copy_transform(&original, al_get_current_transform());
 
-			block_type type = get_block_type(map_x, map_y, m);
-			ALLEGRO_BITMAP *bitmap = textures[type];
+	al_identity_transform(&current);
+	
+	// Align the drawing to the center
+	al_translate_transform(&current, -texture_size / 2.0f, -texture_size / 2.0f);
 
-			al_draw_scaled_bitmap(bitmap,
-					0, 0,								// source x/y
-					texture_size, texture_size,			// source w/h
-					cam.offset_x + center_x + dx * draw_size,		// destination x
-					cam.offset_y + center_y + dy * draw_size,	// destination y
-					draw_size, draw_size,				// destination w/h
-					0);
+	// Center the origin to the camera position.
+	al_translate_transform(&current, -cam.pos_x * texture_size, -cam.pos_y * texture_size);
+
+	// Scale everything
+	al_scale_transform(&current, cam.zoom, cam.zoom);
+
+	// Center origin to the middle of the screen.
+	al_translate_transform(&current, cam.width / 2.0f, cam.height / 2.0f);
+
+	al_use_transform(&current);
+
+	for (int x = 0; x < m.width; x++) {
+		for (int y = 0; y < m.height; y++) {
+			block_type type = get_block_type(x, y, m);
+			ALLEGRO_BITMAP* bitmap = textures[type];
+			al_draw_bitmap(bitmap, x * texture_size, y * texture_size, 0);
 		}
 	}
 
-  // Actually draw to the screen.
-  al_hold_bitmap_drawing(false);
+	// Actually draw to the screen.
+	al_hold_bitmap_drawing(false);
+
+	// Go back to the old tranform
+	al_use_transform(&original);
 }

@@ -42,7 +42,7 @@ int main(void) {
 		case ALLEGRO_EVENT_TIMER:
 			if (event.timer.source == game.render_timer) {
 				//struct timespec t = timer_start();
-				//render_game(&game);
+				update_camera(game.curr_map.rockford_x, game.curr_map.rockford_y, game.cam.zoom, &game.cam);
 				render_camera(game.textures, TEXTURE_SIZE, game.curr_map, game.cam);
 				render_status_bar(&game);
 				al_flip_display();

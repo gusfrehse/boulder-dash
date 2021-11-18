@@ -7,7 +7,7 @@
 
 typedef struct {
 	/// Represent where the camera is on the map in blocks.
-	int pos_x, pos_y;
+	float pos_x, pos_y;
 
 	/// Size of the viewport in pixels.
 	int width, height;
@@ -22,7 +22,7 @@ typedef struct {
 
 camera create_camera(int x, int y, int width, int height, int offset_x, int offset_y, float zoom);
 void update_camera(int x, int y, float zoom, camera *camera);
-void render_camera(ALLEGRO_BITMAP *textures[], int texture_size, map m, camera camera);
+void render_camera(ALLEGRO_BITMAP *textures[], float texture_size, map m, camera camera);
 
 #endif
 

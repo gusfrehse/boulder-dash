@@ -200,6 +200,19 @@ void write_map(FILE *f, map m) {
   }
 }
 
+void copy_map(map *dest, map *source) {
+	memcpy(dest, source, sizeof(map));
+
+	dest->board = calloc(dest->width * dest->height, sizeof(block));
+
+	if (!dest->board) {
+		fprintf(stderr, "ERROR: Could not allocate memory for second board\n");
+		exit(1);
+	}
+
+	memcpy(dest->board, source->board, sizeof(block) * dest->width * dest->height);
+}
+
 void set_block_at(int x, int y, block_type val, map m) {
   m.board[y * m.width + x] = create_block(val);
 }

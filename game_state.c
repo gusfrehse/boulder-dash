@@ -22,7 +22,6 @@ static void init_allegro(int width, int height, game_state* game);
 static void load_map(game_state *game);
 static void load_textures(int atlas_width, int atlas_height, int texture_size, game_state *game);
 static void move_rockford(int x_amount, int y_amount, game_state *game);
-static void copy_map(map *dest, map *source);
 static void reset_map(game_state *game);
 static void game_over(game_state* game);
 
@@ -212,8 +211,6 @@ void update_game(input_controller *c, game_state *game) {
 		((c->key[ALLEGRO_KEY_S]) ? 1 : 0) - ((c->key[ALLEGRO_KEY_W]) ? 1 : 0);
 
 	move_rockford(h_movement, v_movement, game);
-	update_camera(game->curr_map.rockford_x, game->curr_map.rockford_y,
-			game->cam.zoom, &game->cam);
 }
 
 static void move_rockford(int x_amount, int y_amount, game_state *game) {
@@ -290,18 +287,6 @@ static void game_over(game_state* game) {
 	fprintf(stderr, "DEBUG: Game over....\n");
 }
 
-static void copy_map(map *dest, map *source) {
-	memcpy(dest, source, sizeof(map));
-
-	dest->board = calloc(dest->width * dest->height, sizeof(block));
-
-	if (!dest->board) {
-		fprintf(stderr, "ERROR: Could not allocate memory for second board\n");
-		exit(1);
-	}
-
-	memcpy(dest->board, source->board, sizeof(block) * dest->width * dest->height);
-}
 
 static void reset_map(game_state *game) {
 	block *tmp = game->curr_map.board;
