@@ -2,6 +2,7 @@
 #define GAME_STATE_H
 
 #include <allegro5/allegro5.h>
+#include <allegro5/allegro_audio.h>
 #include <allegro5/allegro_font.h>
 #include <allegro5/bitmap.h>
 #include <allegro5/events.h>
@@ -10,6 +11,8 @@
 #include "map.h"
 #include "camera.h"
 #include "score.h"
+
+enum samples { FALLING, DIAMOND_PICKUP, DIGGING, DEATH, SELECTION, NUM_SAMPLES};
 
 enum status { IN_GAME, GAME_OVER, HELP, SHOULD_QUIT };
 
@@ -21,6 +24,7 @@ typedef struct game_state {
 	ALLEGRO_TIMER *oldschool_timer;
 	ALLEGRO_BITMAP *texture_atlas;
 	ALLEGRO_BITMAP *textures[NUM_BLOCKS];
+	ALLEGRO_SAMPLE *samples[NUM_SAMPLES];
 
 	char *score_path;
 	
@@ -36,14 +40,15 @@ typedef struct game_state {
 	map clean_map;
 
 	int status_bar_height;
-	score highscore;
 	score curr_score;
 	int curr_diamonds;
 	int curr_lives;
 	double level_start_time;
 } game_state;
 
-void init_game(game_state *game, int width, int height, float zoom, int atlas_width, int atlas_height, int texture_size, char *level_path, char *score_path);
+void init_game(game_state *game, int width, int height, float zoom,
+			   int atlas_width, int atlas_height, int texture_size, char *atlas_path,
+			   char *level_path, char *score_path);
 void destroy_game(game_state *game);
 
 void start_level(game_state *game);

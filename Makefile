@@ -1,9 +1,9 @@
 OBJS = jogo.o game_state.o input.o map.o stopwatch.o camera.o score.o game_over.o help.o
 
 CFLAGS := -Wall -g
-CFLAGS += $(shell pkg-config allegro-5 allegro_font-5 allegro_image-5 allegro_primitives-5 --cflags)
+CFLAGS += $(shell pkg-config allegro-5 allegro_font-5 allegro_image-5 allegro_primitives-5 allegro_audio-5 allegro_acodec-5 --cflags)
 LDFLAGS := -Wall -g
-LDLIBS := $(shell pkg-config allegro-5 allegro_font-5 allegro_image-5 allegro_primitives-5 --libs) -lm
+LDLIBS := $(shell pkg-config allegro-5 allegro_font-5 allegro_image-5 allegro_primitives-5 allegro_audio-5 allegro_acodec-5 --libs) -lm
 
 all : jogo
 

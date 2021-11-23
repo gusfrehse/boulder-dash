@@ -25,12 +25,13 @@
 
 #define SCORE_FILE_PATH "./resources/score"
 #define LEVEL_FILE_PATH "./resources/level.map"
+#define ATLAS_FILE_PATH "./resources/atlas.png"
 
 int main(void) {
 	ALLEGRO_EVENT event;
 
 	game_state game;
-	init_game(&game, WIDTH, HEIGHT, ZOOM, ATLAS_TEXTURE_W, ATLAS_TEXTURE_H, TEXTURE_SIZE, LEVEL_FILE_PATH, SCORE_FILE_PATH);
+	init_game(&game, WIDTH, HEIGHT, ZOOM, ATLAS_TEXTURE_W, ATLAS_TEXTURE_H, TEXTURE_SIZE, ATLAS_FILE_PATH, LEVEL_FILE_PATH, SCORE_FILE_PATH);
 
 	input_controller controller;
 	reset_input(&controller);

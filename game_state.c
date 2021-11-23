@@ -2,11 +2,13 @@
 
 #include <allegro5/allegro_font.h>
 #include <allegro5/allegro_image.h>
+#include <allegro5/allegro_audio.h>
 #include <allegro5/altime.h>
 #include <allegro5/bitmap.h>
 #include <allegro5/bitmap_draw.h>
 #include <allegro5/drawing.h>
 #include <allegro5/allegro_primitives.h>
+#include <allegro5/allegro_acodec.h>
 #include <allegro5/timer.h>
 
 #include <stdio.h>
@@ -19,41 +21,28 @@
 
 static ALLEGRO_BITMAP *load_texture(char *path);
 static ALLEGRO_BITMAP *load_sub_texture(game_state *game, block_type b);
+static ALLEGRO_SAMPLE* load_sample(char *path);
 static void init_allegro(int width, int height, game_state* game);
 static void load_map(game_state *game, char* path);
-static void load_textures(int atlas_width, int atlas_height, int texture_size, game_state *game);
+static void load_textures(int atlas_width, int atlas_height, int texture_size, char *atlas_path, game_state *game);
+static void load_samples(game_state* game);
 static void move_rockford(int x_amount, int y_amount, game_state *game);
 static void reset_map(game_state *game);
 
 void init_game(game_state *game, int width, int height, float zoom,
-				 int atlas_width, int atlas_height, int texture_size,
+				 int atlas_width, int atlas_height, int texture_size, char *atlas_path,
 				 char *level_path, char *score_path)
 {
 	init_allegro(width, height, game);
 	load_map(game, level_path);
-	load_textures(atlas_width, atlas_height, texture_size, game);
+	load_textures(atlas_width, atlas_height, texture_size, atlas_path, game);
+	load_samples(game);
 
 	game->status_bar_height = 3 * al_get_font_line_height(game->font);
 	game->score_path = score_path;
 	game->cam = create_camera(0, 0, width, height, 0, game->status_bar_height, zoom);
 
 	start_level(game);
-
-	//game->highscore = highest_score(score_path);
-	//- TODO : REMOVE DIS, make actual thing to show the scores. Maybe use it to show help too.
-	//score s;
-	//s.score = 1234;
-	//strcpy(s.name, "ABCD");
-	//insert_score(game->score_path, s);
-	//s.score = 123;
-	//strcpy(s.name, "ABC");
-	//insert_score(game->score_path, s);
-	//score *scores = highest_scores(score_path, 5);
-	//for (int i = 0; i < 5; i++) {
-	//	fprintf(stderr, "DEBUG: %dth score : %d '%s'\n", i, scores[i].score, scores[i].name);
-	//}
-	//exit(1);
-	//- 
 }
 
 void start_level(game_state *game) {
@@ -69,9 +58,11 @@ static void init_allegro(int width, int height, game_state* game) {
 	// TODO: These should be moved somewhere else.
 	al_init();
 	al_install_keyboard();
+	al_install_audio();
 	al_init_image_addon();
 	al_init_font_addon();
 	al_init_primitives_addon();
+	al_init_acodec_addon();
 
 	game->display = al_create_display(width, height);
 	game->font = al_create_builtin_font();
@@ -100,12 +91,12 @@ static void load_map(game_state *game, char *path) {
 	fclose(map1);
 }
 
-static void load_textures(int atlas_width, int atlas_height, int texture_size, game_state *game) {
+static void load_textures(int atlas_width, int atlas_height, int texture_size, char *atlas_path, game_state *game) {
 	game->atlas_height = atlas_height;
 	game->atlas_width = atlas_width;
 	game->texture_size = texture_size;
 
-	game->texture_atlas = load_texture("./resources/atlas.png");
+	game->texture_atlas = load_texture(atlas_path);
 
 	game->textures[DIRT] = load_sub_texture(game, DIRT);
 	game->textures[ROCK] = load_sub_texture(game, ROCK);
@@ -115,6 +106,28 @@ static void load_textures(int atlas_width, int atlas_height, int texture_size, g
 	game->textures[BRICK] = load_sub_texture(game, BRICK);
 	game->textures[STEEL] = load_sub_texture(game, STEEL);
 	game->textures[DUST] = load_sub_texture(game, DUST);
+}
+
+static void load_samples(game_state* game) {
+	game->samples[FALLING] = load_sample("./resources/falling.wav");
+	game->samples[DIAMOND_PICKUP] = load_sample("./resources/diamond_pickup.wav");
+	game->samples[DIGGING] = load_sample("./resources/digging.wav");
+	game->samples[DEATH] = load_sample("./resources/death.wav");
+	game->samples[SELECTION] = load_sample("./resources/selection.wav");
+}
+
+static ALLEGRO_SAMPLE* load_sample(char *path) {
+	int num_samples = 5;
+	al_reserve_samples(num_samples);
+	ALLEGRO_SAMPLE *sample = al_load_sample(path);
+	if (!sample) {
+		fprintf(stderr, "ERROR: Could not load sample '%s'.\n", path);
+		exit(1);
+	}
+
+	fprintf(stderr, "Loaded sample '%s'.\n", path);
+
+	return sample;
 }
 
 void destroy_game(game_state *game) {
@@ -128,6 +141,7 @@ void destroy_game(game_state *game) {
 
 static void kill_rockford(game_state *game) {
 	explode_at(game->curr_map.rockford_x, game->curr_map.rockford_y, game->curr_map);
+	al_play_sample(game->samples[DEATH], 1.0f, 0.0f, 1.0f, ALLEGRO_PLAYMODE_ONCE, NULL);
 
 	reset_map(game);
 
@@ -174,7 +188,7 @@ static void apply_physics(int x, int y, game_state *game) {
 		set_block_at(x, y + 1, get_block_type(x, y, game->curr_map), game->curr_map);
 		set_block_at(x, y, AIR, game->curr_map);
 		set_block_property(x, y + 1, IN_MOVEMENT | HAS_CHANGED, game->curr_map);
-	return;
+		return;
 	}
 
 	// If over unstable block, go to the right or left.
@@ -283,11 +297,11 @@ static ALLEGRO_BITMAP *load_texture(char *path)
 	ALLEGRO_BITMAP *texture = al_load_bitmap(path);
 	if (!texture)
 	{
-		fprintf(stderr, "ERROR: Could not load texture '%s'", path);
+		fprintf(stderr, "ERROR: Could not load texture '%s'.", path);
 		exit(1);
 	}
 
-	fprintf(stderr, "Loaded texture %s\n", path);
+	fprintf(stderr, "Loaded texture %s.\n", path);
 
 	return texture;
 }
@@ -319,7 +333,7 @@ void render_status_bar(game_state *game) {
 	sprintf(status_str, "DIAMONDS: %d", game->curr_diamonds);
 	al_draw_text(game->font, al_map_rgb(230, 230, 230), game->cam.width * 0.1f, game->status_bar_height * 1.0f / 3.0f, ALLEGRO_ALIGN_LEFT, status_str);
 
-	sprintf(status_str, "HIGHSCORE: %d SCORE: %d", game->highscore.score, game->curr_score.score);
+	sprintf(status_str, "SCORE: %d", game->curr_score.score);
 	al_draw_text(game->font, al_map_rgb(230, 230, 230), game->cam.width * 0.5f, game->status_bar_height * 1.0f / 3.0f, ALLEGRO_ALIGN_CENTER, status_str);
 
 	sprintf(status_str, "LIVES: %d", game->curr_lives);
