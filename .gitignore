@@ -1,4 +1,5 @@
 *.o
+.clangd/*
 jogo
 compile_commands.json
 Session.vim

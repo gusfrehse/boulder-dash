@@ -15,8 +15,6 @@
 
 #define WIDTH 1024
 #define HEIGHT 576
-#define WIDTH 1280
-#define HEIGHT 720
 #define ZOOM (1.0f)
 
 #define ATLAS_TEXTURE_W 3 // Number of sprites in a line of the atlas

@@ -38,6 +38,7 @@ void init_game(game_state *game, int width, int height, float zoom,
 	load_textures(atlas_width, atlas_height, texture_size, atlas_path, game);
 	load_samples(game);
 
+	game->status = IN_GAME;
 	game->status_bar_height = 3 * al_get_font_line_height(game->font);
 	game->score_path = score_path;
 	game->cam = create_camera(0, 0, width, height, 0, game->status_bar_height, zoom);
@@ -191,28 +192,40 @@ static void apply_physics(int x, int y, game_state *game) {
 		return;
 	}
 
-	// If over unstable block, go to the right or left.
-	if (get_block_property(x, y, IT_COLLIDES, game->curr_map) &&
-		get_block_property(x, y + 1, IS_UNSTABLE, game->curr_map)) {
+	if (get_block_property(x, y, IT_COLLIDES, game->curr_map)) {
 
-		if (!get_block_property(x - 1, y, IT_COLLIDES, game->curr_map) &&
-			!get_block_property(x - 1, y + 1, IT_COLLIDES, game->curr_map)) {
-
-			// Can move to the left
-			set_block_at(x - 1, y, get_block_type(x, y, game->curr_map), game->curr_map);
-			set_block_property(x - 1, y, HAS_CHANGED, game->curr_map);
-			set_block_at(x, y, AIR, game->curr_map);
-
-		} else if (!get_block_property(x + 1, y, IT_COLLIDES, game->curr_map) &&
-					 !get_block_property(x + 1, y + 1, IT_COLLIDES, game->curr_map)) {
-
-			// Can move to the right
-			set_block_at(x + 1, y, get_block_type(x, y, game->curr_map), game->curr_map);
-			set_block_property(x + 1, y, HAS_CHANGED, game->curr_map);
-			set_block_at(x, y, AIR, game->curr_map);
+		if (get_block_property(x, y, IN_MOVEMENT, game->curr_map)) {
+			// Fell over something so we play a sound.
+			al_play_sample(game->samples[FALLING], 1.0f, 0.0f, 1.0f, ALLEGRO_PLAYMODE_ONCE, NULL);
 		}
 
-		return;
+		// In the case it didn't move
+		unset_block_property(x, y, IN_MOVEMENT, game->curr_map);
+
+		// If over unstable block, go to the right or left.
+		if (get_block_property(x, y + 1, IS_UNSTABLE, game->curr_map)) {
+
+			if (!get_block_property(x - 1, y, IT_COLLIDES, game->curr_map) &&
+				!get_block_property(x - 1, y + 1, IT_COLLIDES, game->curr_map)) {
+
+				// Can move to the left
+				set_block_at(x - 1, y, get_block_type(x, y, game->curr_map), game->curr_map);
+				set_block_property(x - 1, y, HAS_CHANGED, game->curr_map);
+				set_block_at(x, y, AIR, game->curr_map);
+
+				return;
+
+			} else if (!get_block_property(x + 1, y, IT_COLLIDES, game->curr_map) &&
+						 !get_block_property(x + 1, y + 1, IT_COLLIDES, game->curr_map)) {
+
+				// Can move to the right
+				set_block_at(x + 1, y, get_block_type(x, y, game->curr_map), game->curr_map);
+				set_block_property(x + 1, y, HAS_CHANGED, game->curr_map);
+				set_block_at(x, y, AIR, game->curr_map);
+
+				return;
+			}
+		}
 	}
 
 	// Don't move otherwise
@@ -259,8 +272,12 @@ static void move_rockford(int x_amount, int y_amount, game_state *game) {
 	    !get_block_property(destx, desty, IT_COLLIDES, game->curr_map)) {
 	
 		// We can dig the block!
-		if (get_block_type(destx, desty, game->curr_map) == DIAMOND)
+		if (get_block_type(destx, desty, game->curr_map) == DIAMOND) {
+			al_play_sample(game->samples[DIAMOND_PICKUP], 1.0f, 0.0f, 1.0f, ALLEGRO_PLAYMODE_ONCE, NULL);
 			game->curr_diamonds++;
+		} else if(get_block_type(destx, desty, game->curr_map) == DIRT) {
+			al_play_sample(game->samples[DIGGING], 1.0f, 0.0f, 1.0f, ALLEGRO_PLAYMODE_ONCE, NULL);
+		}
 	
 		set_block_at(game->curr_map.rockford_x, game->curr_map.rockford_y, AIR, game->curr_map);
 		set_block_at(destx, desty, ROCKFORD, game->curr_map);

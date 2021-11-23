@@ -12,6 +12,7 @@ static const char *help_text =
 	"Collect the diamonds to increase your score.\n"
 	"Be careful with the rocks! If one falls over you, you die!\n"
 	"You have 3 lives at the start.\n" 
+	"Press Esc at any time to exit.\n"
 	"Press Enter to continue.\n";
 
 void update_help(input_controller *c, game_state *game) {
