@@ -23,7 +23,7 @@ float lerp(float start, float end, float t) {
 }
 
 void update_camera(int x, int y, float zoom, camera *cam) {
-	float speed = 0.1f;
+	float speed = 0.1f; // TODO: make part of struct 
 	cam->pos_x = (lerp(cam->pos_x, x, speed));
 	cam->pos_y = (lerp(cam->pos_y, y, speed));
 }

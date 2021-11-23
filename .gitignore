@@ -1,4 +1,6 @@
 *.o
 jogo
 compile_commands.json
+Session.vim
 .cache
+.gdb_history

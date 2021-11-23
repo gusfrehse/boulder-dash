@@ -15,30 +15,54 @@
 #include "input.h"
 #include "map.h"
 #include "camera.h"
+#include "score.h"
 
 static ALLEGRO_BITMAP *load_texture(char *path);
 static ALLEGRO_BITMAP *load_sub_texture(game_state *game, block_type b);
 static void init_allegro(int width, int height, game_state* game);
-static void load_map(game_state *game);
+static void load_map(game_state *game, char* path);
 static void load_textures(int atlas_width, int atlas_height, int texture_size, game_state *game);
 static void move_rockford(int x_amount, int y_amount, game_state *game);
 static void reset_map(game_state *game);
-static void game_over(game_state* game);
 
 void init_game(game_state *game, int width, int height, float zoom,
 				 int atlas_width, int atlas_height, int texture_size,
-				 char *level_path)
+				 char *level_path, char *score_path)
 {
 	init_allegro(width, height, game);
-	load_map(game);
+	load_map(game, level_path);
 	load_textures(atlas_width, atlas_height, texture_size, game);
 
 	game->status_bar_height = 3 * al_get_font_line_height(game->font);
-	game->curr_score = 0;
+	game->score_path = score_path;
+	game->cam = create_camera(0, 0, width, height, 0, game->status_bar_height, zoom);
+
+	start_level(game);
+
+	//game->highscore = highest_score(score_path);
+	//- TODO : REMOVE DIS, make actual thing to show the scores. Maybe use it to show help too.
+	//score s;
+	//s.score = 1234;
+	//strcpy(s.name, "ABCD");
+	//insert_score(game->score_path, s);
+	//s.score = 123;
+	//strcpy(s.name, "ABC");
+	//insert_score(game->score_path, s);
+	//score *scores = highest_scores(score_path, 5);
+	//for (int i = 0; i < 5; i++) {
+	//	fprintf(stderr, "DEBUG: %dth score : %d '%s'\n", i, scores[i].score, scores[i].name);
+	//}
+	//exit(1);
+	//- 
+}
+
+void start_level(game_state *game) {
+	game->curr_score.score = 0;
+	strcpy(game->curr_score.name, "unknown");
+
 	game->curr_diamonds = 0;
 	game->curr_lives = 3;
 	game->level_start_time = al_get_time();
-	game->cam = create_camera(0, 0, width, height, 0, game->status_bar_height, 0.4f);
 }
 
 static void init_allegro(int width, int height, game_state* game) {
@@ -52,17 +76,16 @@ static void init_allegro(int width, int height, game_state* game) {
 	game->display = al_create_display(width, height);
 	game->font = al_create_builtin_font();
 	game->queue = al_create_event_queue();
-	game->render_timer = al_create_timer(1.0 / 60.0);
-	game->update_timer = al_create_timer(1.0 / 10.0);
+	game->realtime_timer = al_create_timer(1.0 / 60.0);
+	game->oldschool_timer = al_create_timer(1.0 / 10.0);
 
 	al_register_event_source(game->queue, al_get_keyboard_event_source());
 	al_register_event_source(game->queue, al_get_display_event_source(game->display));
-	al_register_event_source(game->queue, al_get_timer_event_source(game->update_timer));
-	al_register_event_source(game->queue, al_get_timer_event_source(game->render_timer));
+	al_register_event_source(game->queue, al_get_timer_event_source(game->oldschool_timer));
+	al_register_event_source(game->queue, al_get_timer_event_source(game->realtime_timer));
 }
 
-static void load_map(game_state *game) {
-	char *path = "level1.map";
+static void load_map(game_state *game, char *path) {
 	FILE *map1 = fopen(path, "r");
 
 	if (!map1) {
@@ -98,8 +121,8 @@ void destroy_game(game_state *game) {
 	free(game->curr_map.board);
 	al_destroy_font(game->font);
 	al_destroy_display(game->display);
-	al_destroy_timer(game->render_timer);
-	al_destroy_timer(game->update_timer);
+	al_destroy_timer(game->realtime_timer);
+	al_destroy_timer(game->oldschool_timer);
 	al_destroy_event_queue(game->queue);
 }
 
@@ -108,8 +131,9 @@ static void kill_rockford(game_state *game) {
 
 	reset_map(game);
 
-	if (!--game->curr_lives) // if the lives get to zero it's game over.
-		game_over(game);
+	if (!--game->curr_lives)  {// if the lives get to zero it's game over.
+		game->status = GAME_OVER;
+	}
 }
 
 static void apply_physics(int x, int y, game_state *game) {
@@ -197,39 +221,61 @@ void update_physics(game_state *game) {
 
 void update_game(input_controller *c, game_state *game) {
 	if (c->key[ALLEGRO_KEY_ESCAPE])
-		game->should_quit = 1;
+		game->status = SHOULD_QUIT;
+
+	if (c->key[ALLEGRO_KEY_H] || c->key[ALLEGRO_KEY_F1]) {
+		game->status = HELP;
+	}
 
 	int h_movement = 0;
 	int v_movement = 0;
 
-	h_movement =
-		((c->key[ALLEGRO_KEY_D]) ? 1 : 0) - ((c->key[ALLEGRO_KEY_A]) ? 1 : 0);
+	h_movement = ((c->key[ALLEGRO_KEY_D]) ? 1 : 0) - ((c->key[ALLEGRO_KEY_A]) ? 1 : 0);
 	if (h_movement == 0)
-		v_movement =
-		((c->key[ALLEGRO_KEY_S]) ? 1 : 0) - ((c->key[ALLEGRO_KEY_W]) ? 1 : 0);
+		v_movement = ((c->key[ALLEGRO_KEY_S]) ? 1 : 0) - ((c->key[ALLEGRO_KEY_W]) ? 1 : 0);
 
 	move_rockford(h_movement, v_movement, game);
 }
 
 static void move_rockford(int x_amount, int y_amount, game_state *game) {
-  int destx = game->curr_map.rockford_x + x_amount;
-  int desty = game->curr_map.rockford_y + y_amount;
-  
-  if (get_block_property(destx, desty, IS_DIGGABLE, game->curr_map) ||
-      !get_block_property(destx, desty, IT_COLLIDES, game->curr_map)) {
-	// We can dig the block!
-	if (get_block_type(destx, desty, game->curr_map) == DIAMOND)
-		game->curr_diamonds++;
+	int destx = game->curr_map.rockford_x + x_amount;
+	int desty = game->curr_map.rockford_y + y_amount;
+	
+	if (get_block_property(destx, desty, IS_DIGGABLE, game->curr_map) ||
+	    !get_block_property(destx, desty, IT_COLLIDES, game->curr_map)) {
+	
+		// We can dig the block!
+		if (get_block_type(destx, desty, game->curr_map) == DIAMOND)
+			game->curr_diamonds++;
+	
+		set_block_at(game->curr_map.rockford_x, game->curr_map.rockford_y, AIR, game->curr_map);
+		set_block_at(destx, desty, ROCKFORD, game->curr_map);
+		
+		game->curr_map.rockford_x = destx;
+		game->curr_map.rockford_y = desty;
+	
+	} else if (get_block_property(destx, desty, IS_PUSHABLE, game->curr_map)) {
+		if (destx) {
+			// Check if horizontal (we can't push in the vertical)
+			// TODO : if next block not collides push the block, maybe add random so it seems difficult to push.
+			int pushable_x = destx + x_amount;
 
-	set_block_at(game->curr_map.rockford_x, game->curr_map.rockford_y, AIR, game->curr_map);
-    set_block_at(game->curr_map.rockford_x + x_amount, game->curr_map.rockford_y + y_amount, ROCKFORD, game->curr_map);
+			if (get_block_property(pushable_x, desty, IT_COLLIDES, game->curr_map))
+				return;
 
-    game->curr_map.rockford_x += x_amount;
-    game->curr_map.rockford_y += y_amount;
+			// Move the thing
+			set_block_at(pushable_x, desty, get_block_type(destx, desty, game->curr_map), game->curr_map);
+			//set_block_property(pushable_x, desty, HAS_CHANGED, game->curr_map);
 
-  } else if (get_block_property(destx, desty, IS_PUSHABLE, game->curr_map)) {
-    // TODO : if next block not collides push the block, maybe add random so it seems difficult to push.
-  }
+			// Move Rockford
+			set_block_at(destx, desty, ROCKFORD, game->curr_map);
+
+			set_block_at(game->curr_map.rockford_x, game->curr_map.rockford_y, AIR, game->curr_map);
+
+			game->curr_map.rockford_x = destx;
+			game->curr_map.rockford_y = desty;
+		}
+	}
 }
 
 static ALLEGRO_BITMAP *load_texture(char *path)
@@ -252,8 +298,7 @@ static ALLEGRO_BITMAP *load_sub_texture(game_state *game, block_type b)
 	int x = game->texture_size * (b % game->atlas_width);
 	int y = game->texture_size * (b / game->atlas_width);
 
-	texture = al_create_sub_bitmap(game->texture_atlas, x, y, game->texture_size,
-			game->texture_size);
+	texture = al_create_sub_bitmap(game->texture_atlas, x, y, game->texture_size, game->texture_size);
 
 	if (!texture)
 	{
@@ -274,17 +319,12 @@ void render_status_bar(game_state *game) {
 	sprintf(status_str, "DIAMONDS: %d", game->curr_diamonds);
 	al_draw_text(game->font, al_map_rgb(230, 230, 230), game->cam.width * 0.1f, game->status_bar_height * 1.0f / 3.0f, ALLEGRO_ALIGN_LEFT, status_str);
 
-	sprintf(status_str, "SCORE: %d", game->curr_score);
+	sprintf(status_str, "HIGHSCORE: %d SCORE: %d", game->highscore.score, game->curr_score.score);
 	al_draw_text(game->font, al_map_rgb(230, 230, 230), game->cam.width * 0.5f, game->status_bar_height * 1.0f / 3.0f, ALLEGRO_ALIGN_CENTER, status_str);
 
 	sprintf(status_str, "LIVES: %d", game->curr_lives);
 	al_draw_text(game->font, al_map_rgb(235, 235, 235), game->cam.width * 0.9f, game->status_bar_height * 1.0f / 3.0f, ALLEGRO_ALIGN_RIGHT, status_str);
 }
-
-static void game_over(game_state* game) {
-	fprintf(stderr, "DEBUG: Game over....\n");
-}
-
 
 static void reset_map(game_state *game) {
 	block *tmp = game->curr_map.board;
@@ -295,3 +335,4 @@ static void reset_map(game_state *game) {
 
 	memcpy(game->curr_map.board, game->clean_map.board, sizeof(block) * game->curr_map.width * game->curr_map.height);
 }
+
