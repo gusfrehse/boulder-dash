@@ -5,6 +5,7 @@
 #include <allegro5/allegro5.h>
 
 #include "map.h"
+#include "texture.h"
 
 camera create_camera(int x, int y, int width, int height, int offset_x, int offset_y, float zoom) {
 	camera cam;
@@ -28,7 +29,7 @@ void update_camera(int x, int y, float zoom, camera *cam) {
 	cam->pos_y = (lerp(cam->pos_y, y, speed));
 }
 
-void render_camera(ALLEGRO_BITMAP *textures[], float texture_size, map m, camera cam) {
+void render_camera(texture_system *ts, map m, camera cam) {
 	al_clear_to_color(al_map_rgb(0, 0, 0));
   
 	// Improves performance by sending the atlas texture only once per frame.
@@ -42,10 +43,10 @@ void render_camera(ALLEGRO_BITMAP *textures[], float texture_size, map m, camera
 	al_identity_transform(&current);
 	
 	// Align the drawing to the center
-	al_translate_transform(&current, -texture_size / 2.0f, -texture_size / 2.0f);
+	al_translate_transform(&current, -ts->texture_size / 2.0f, -ts->texture_size / 2.0f);
 
 	// Center the origin to the camera position.
-	al_translate_transform(&current, -cam.pos_x * texture_size, -cam.pos_y * texture_size);
+	al_translate_transform(&current, -cam.pos_x * ts->texture_size, -cam.pos_y * ts->texture_size);
 
 	// Scale everything
 	al_scale_transform(&current, cam.zoom, cam.zoom);
@@ -58,8 +59,7 @@ void render_camera(ALLEGRO_BITMAP *textures[], float texture_size, map m, camera
 	for (int x = 0; x < m.width; x++) {
 		for (int y = 0; y < m.height; y++) {
 			block_type type = get_block_type(x, y, m);
-			ALLEGRO_BITMAP* bitmap = textures[type];
-			al_draw_bitmap(bitmap, x * texture_size, y * texture_size, 0);
+			draw_texture_animated(type, x * ts->texture_size, y * ts->texture_size, ts);
 		}
 	}
 

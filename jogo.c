@@ -29,7 +29,7 @@ int main(void) {
 	ALLEGRO_EVENT event;
 
 	game_state game;
-	init_game(&game, WIDTH, HEIGHT, ZOOM, ATLAS_TEXTURE_W, ATLAS_TEXTURE_H, TEXTURE_SIZE, ATLAS_FILE_PATH, LEVEL_FILE_PATH, SCORE_FILE_PATH);
+	init_game(&game, WIDTH, HEIGHT, ZOOM, ATLAS_FILE_PATH, LEVEL_FILE_PATH, SCORE_FILE_PATH);
 
 	input_controller controller;
 	reset_input(&controller);
@@ -48,8 +48,9 @@ int main(void) {
 			if (event.timer.source == game.realtime_timer) {
 				//struct timespec t = timer_start();
 				if (game.status == IN_GAME) {
+					// TOODOOOO
 					update_camera(game.curr_map.rockford_x, game.curr_map.rockford_y, game.cam.zoom, &game.cam);
-					render_camera(game.textures, TEXTURE_SIZE, game.curr_map, game.cam);
+					render_camera(&game.texture_system, game.curr_map, game.cam);
 					render_status_bar(&game);
 				} else if (game.status == GAME_OVER) {
 					update_game_over(&controller, &game);

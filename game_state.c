@@ -18,24 +18,21 @@
 #include "map.h"
 #include "camera.h"
 #include "score.h"
+#include "texture.h"
 
-static ALLEGRO_BITMAP *load_texture(char *path);
-static ALLEGRO_BITMAP *load_sub_texture(game_state *game, block_type b);
 static ALLEGRO_SAMPLE* load_sample(char *path);
 static void init_allegro(int width, int height, game_state* game);
 static void load_map(game_state *game, char* path);
-static void load_textures(int atlas_width, int atlas_height, int texture_size, char *atlas_path, game_state *game);
 static void load_samples(game_state* game);
 static void move_rockford(int x_amount, int y_amount, game_state *game);
 static void reset_map(game_state *game);
 
 void init_game(game_state *game, int width, int height, float zoom,
-				 int atlas_width, int atlas_height, int texture_size, char *atlas_path,
-				 char *level_path, char *score_path)
-{
+				 char *atlas_path, char *level_path, char *score_path) {
+
 	init_allegro(width, height, game);
 	load_map(game, level_path);
-	load_textures(atlas_width, atlas_height, texture_size, atlas_path, game);
+	load_texture_system(&game->texture_system, atlas_path);
 	load_samples(game);
 
 	game->status = IN_GAME;
@@ -90,23 +87,6 @@ static void load_map(game_state *game, char *path) {
 	copy_map(&game->curr_map, &game->clean_map); // sets curr_map
 
 	fclose(map1);
-}
-
-static void load_textures(int atlas_width, int atlas_height, int texture_size, char *atlas_path, game_state *game) {
-	game->atlas_height = atlas_height;
-	game->atlas_width = atlas_width;
-	game->texture_size = texture_size;
-
-	game->texture_atlas = load_texture(atlas_path);
-
-	game->textures[DIRT] = load_sub_texture(game, DIRT);
-	game->textures[ROCK] = load_sub_texture(game, ROCK);
-	game->textures[ROCKFORD] = load_sub_texture(game, ROCKFORD);
-	game->textures[DIAMOND] = load_sub_texture(game, DIAMOND);
-	game->textures[AIR] = load_sub_texture(game, AIR);
-	game->textures[BRICK] = load_sub_texture(game, BRICK);
-	game->textures[STEEL] = load_sub_texture(game, STEEL);
-	game->textures[DUST] = load_sub_texture(game, DUST);
 }
 
 static void load_samples(game_state* game) {
@@ -307,39 +287,6 @@ static void move_rockford(int x_amount, int y_amount, game_state *game) {
 			game->curr_map.rockford_y = desty;
 		}
 	}
-}
-
-static ALLEGRO_BITMAP *load_texture(char *path)
-{
-	ALLEGRO_BITMAP *texture = al_load_bitmap(path);
-	if (!texture)
-	{
-		fprintf(stderr, "ERROR: Could not load texture '%s'.", path);
-		exit(1);
-	}
-
-	fprintf(stderr, "Loaded texture %s.\n", path);
-
-	return texture;
-}
-
-static ALLEGRO_BITMAP *load_sub_texture(game_state *game, block_type b)
-{
-	ALLEGRO_BITMAP *texture;
-	int x = game->texture_size * (b % game->atlas_width);
-	int y = game->texture_size * (b / game->atlas_width);
-
-	texture = al_create_sub_bitmap(game->texture_atlas, x, y, game->texture_size, game->texture_size);
-
-	if (!texture)
-	{
-		fprintf(stderr, "ERROR: Could not load sub texture '%s'", block_name(b));
-		exit(1);
-	}
-
-	fprintf(stderr, "Loaded sub texture %s\n", block_name(b));
-
-	return texture;
 }
 
 void render_status_bar(game_state *game) {
