@@ -6,11 +6,11 @@
 typedef enum {
 	T_ROCKFORD_L,
 	T_ROCKFORD_R,
-	T_ROCKFORD_PUSH,
 	T_DIRT,
 	T_DIAMOND,
 	T_ROCK,
 	T_STEEL,
+	T_DUST,
 	T_NUM
 } texture;
 
