@@ -4,11 +4,14 @@
 #include <allegro5/allegro5.h>
 
 typedef enum {
+	T_DIRT,
+	T_ROCK,
 	T_ROCKFORD_L,
 	T_ROCKFORD_R,
-	T_DIRT,
+	T_ROCKFORD,
 	T_DIAMOND,
-	T_ROCK,
+	T_AIR,
+	T_BRICK,
 	T_STEEL,
 	T_DUST,
 	T_NUM
