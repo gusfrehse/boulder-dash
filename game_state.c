@@ -31,9 +31,13 @@ void init_game(game_state *game, int width, int height, float zoom,
 				 char *atlas_path, char *level_path, char *score_path) {
 
 	init_allegro(width, height, game);
+	fprintf(stderr, "Finished loading Allegro.\n");
 	load_map(game, level_path);
+	fprintf(stderr, "Finished loading map.\n");
 	load_texture_system(&game->texture_system, atlas_path);
+	fprintf(stderr, "Finished loading texture system.\n");
 	load_samples(game);
+	fprintf(stderr, "Finished loading resources.\n");
 
 	game->status = IN_GAME;
 	game->status_bar_height = 3 * al_get_font_line_height(game->font);
@@ -91,6 +95,8 @@ static void load_map(game_state *game, char *path) {
 }
 
 static void load_samples(game_state* game) {
+	int num_samples = 5;
+	al_reserve_samples(num_samples);
 	game->samples[FALLING] = load_sample("./resources/falling.wav");
 	game->samples[DIAMOND_PICKUP] = load_sample("./resources/diamond_pickup.wav");
 	game->samples[DIGGING] = load_sample("./resources/digging.wav");
@@ -99,8 +105,6 @@ static void load_samples(game_state* game) {
 }
 
 static ALLEGRO_SAMPLE* load_sample(char *path) {
-	int num_samples = 5;
-	al_reserve_samples(num_samples);
 	ALLEGRO_SAMPLE *sample = al_load_sample(path);
 	if (!sample) {
 		fprintf(stderr, "ERROR: Could not load sample '%s'.\n", path);
