@@ -96,7 +96,10 @@ static void load_map(game_state *game, char *path) {
 
 static void load_samples(game_state* game) {
 	int num_samples = 5;
-	al_reserve_samples(num_samples);
+	if (!al_reserve_samples(num_samples)) {
+		fprintf(stderr, "ERROR: Could not reserve samples\n");
+		exit(1);
+	}
 	game->samples[FALLING] = load_sample("./resources/falling.wav");
 	game->samples[DIAMOND_PICKUP] = load_sample("./resources/diamond_pickup.wav");
 	game->samples[DIGGING] = load_sample("./resources/digging.wav");

@@ -27,11 +27,11 @@ static ALLEGRO_BITMAP *load_animation_frame(texture t, int animation_frame, ALLE
 	texture = al_create_sub_bitmap(atlas, x, y, t_size, t_size);
 
 	if (!texture) {
-		fprintf(stderr, "ERROR: Could not load sub texture '%d'", t);
+		fprintf(stderr, "ERROR: Could not load animation frame %d of texture '%d'", animation_frame, t);
 		exit(1);
 	}
 
-	fprintf(stderr, "Loaded sub texture %d\n", t);
+	fprintf(stderr, "Loaded animation frame %d of texture %d\n", animation_frame, t);
 
 	return texture;
 }
@@ -60,7 +60,7 @@ void load_texture_system(texture_system *ts, char *atlas_path) {
 
 	for (int i = 0; i < T_NUM; i++) {
 		for (int j = 0; j < ts->animation_frames; j++) {
-			ts->textures[i * T_NUM + j] = load_animation_frame(i, j, ts->atlas, ts->texture_size);
+			ts->textures[i + j * T_NUM] = load_animation_frame(i, j, ts->atlas, ts->texture_size);
 		}
 	}
 }
