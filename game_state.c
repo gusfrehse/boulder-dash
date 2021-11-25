@@ -39,6 +39,7 @@ void init_game(game_state *game, int width, int height, float zoom,
 	load_samples(game);
 	fprintf(stderr, "Finished loading resources.\n");
 
+	game->selection = 0;
 	game->status = IN_GAME;
 	game->status_bar_height = 3 * al_get_font_line_height(game->font);
 	game->score_path = score_path;

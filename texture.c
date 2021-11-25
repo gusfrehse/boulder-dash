@@ -72,6 +72,6 @@ void draw_texture_animated(int x, int y, texture t, texture_system *ts) {
 
 	assert(frame < ts->animation_frames);
 
-	al_draw_bitmap(ts->textures[t * T_NUM + frame], x, y, 0);
+	al_draw_bitmap(ts->textures[frame * T_NUM + t], x, y, 0);
 }
 
