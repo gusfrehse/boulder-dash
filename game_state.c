@@ -130,6 +130,7 @@ void destroy_game(game_state *game) {
 }
 
 static void kill_rockford(game_state *game) {
+	// TODO: maybe move to map.h?
 	explode_at(game->curr_map.rockford_x, game->curr_map.rockford_y, game->curr_map);
 	al_play_sample(game->samples[DEATH], 1.0f, 0.0f, 1.0f, ALLEGRO_PLAYMODE_ONCE, NULL);
 
@@ -141,6 +142,7 @@ static void kill_rockford(game_state *game) {
 }
 
 static void apply_physics(int x, int y, game_state *game) {
+	// TODO: Maybe move this to map.h?
 	// If rock over rock -> rock over falls if possible
 	// If rock over dirt -> rock stays
 	// If rock over air -> rock moves down
@@ -254,6 +256,7 @@ void update_game(input_controller *c, game_state *game) {
 }
 
 static void move_rockford(int x_amount, int y_amount, game_state *game) {
+	// TODO: move this to map.h
 	int destx = game->curr_map.rockford_x + x_amount;
 	int desty = game->curr_map.rockford_y + y_amount;
 	

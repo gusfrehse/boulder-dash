@@ -45,9 +45,7 @@ int main(void) {
 			break;
 		case ALLEGRO_EVENT_TIMER:
 			if (event.timer.source == game.realtime_timer) {
-				//struct timespec t = timer_start();
 				if (game.status == IN_GAME) {
-					// TOODOOOO
 					update_camera(game.curr_map.rockford_x, game.curr_map.rockford_y, game.cam.zoom, &game.cam);
 					render_camera(&game.texture_system, game.curr_map, game.cam);
 					render_status_bar(&game);
@@ -59,15 +57,10 @@ int main(void) {
 					render_help(&game);
 				}
 				al_flip_display();
-				//long long time = timer_end(t);
-				//fprintf(stderr, "DEBUG: Render time %f s\n", (double)time * 1e-9);
 			} else if (event.timer.source == game.oldschool_timer) {
-				//struct timespec t = timer_start();
 				update_physics(&game);
 				update_input(&controller);
 				update_game(&controller, &game);
-				//long long time = timer_end(t);
-				//fprintf(stderr, "DEBUG: Update time %f s\n", (double)time * 1e-9);
 			}
 			break;
 		case ALLEGRO_EVENT_DISPLAY_CLOSE:
