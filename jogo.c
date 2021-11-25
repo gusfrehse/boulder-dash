@@ -10,7 +10,6 @@
 #include "input.h"
 #include "game_over.h"
 #include "help.h"
-#include "stopwatch.h"
 #include "camera.h"
 
 #define WIDTH 1024
