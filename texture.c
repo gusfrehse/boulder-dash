@@ -1,11 +1,13 @@
 #include "texture.h"
 
+#include <allegro5/keycodes.h>
 #include <stdio.h>
 #include <math.h>
 
 #include <allegro5/allegro5.h>
 
 #include "map.h"
+#include "input.h"
 
 static ALLEGRO_BITMAP *load_texture(char *path) {
 	ALLEGRO_BITMAP *texture = al_load_bitmap(path);
@@ -62,6 +64,18 @@ void load_texture_system(texture_system *ts, char *atlas_path) {
 		for (int j = 0; j < ts->animation_frames; j++) {
 			ts->textures[i + j * T_NUM] = load_animation_frame(i, j, ts->atlas, ts->texture_size);
 		}
+	}
+}
+
+void update_texture_system(input_controller *c, texture_system *ts) {
+
+	// Update rockford texture so it reflect the input.
+	if (c->key[ALLEGRO_KEY_D] || c->key[ALLEGRO_KEY_RIGHT]) {
+		ts->curr_textures[ROCKFORD] = T_ROCKFORD_R;
+	} else if (c->key[ALLEGRO_KEY_A] || c->key[ALLEGRO_KEY_LEFT]) {
+		ts->curr_textures[ROCKFORD] = T_ROCKFORD_L;
+	} else {
+		ts->curr_textures[ROCKFORD] = T_ROCKFORD;
 	}
 }
 

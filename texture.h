@@ -4,6 +4,7 @@
 #include <allegro5/allegro5.h>
 
 #include "map.h"
+#include "input.h"
 
 typedef enum {
 	T_DIRT,
@@ -28,6 +29,7 @@ typedef struct {
 } texture_system;
 
 void load_texture_system(texture_system *ts, char *atlas_path);
+void update_texture_system(input_controller *c, texture_system *ts);
 void draw_texture_animated(int x, int y, texture t, texture_system *ts);
 
 #endif
