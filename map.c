@@ -54,8 +54,9 @@ void write_block(FILE *f, int x, int y, map m) {
  * Returns a map from a file handle.
  */
 map map_from_file(FILE *f) {
-  char buf[(MAP_MAX_WIDTH + 1) * (MAP_MAX_HEIGHT)];
   char s[MAP_MAX_WIDTH + 1];
+  char buf[(MAP_MAX_WIDTH + 1) * (MAP_MAX_HEIGHT)];
+  buf[0] = '\0';
   int i = 0;
 
   while (fgets(s, sizeof(s), f) && i++ < MAP_MAX_HEIGHT) {
