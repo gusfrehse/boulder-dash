@@ -59,7 +59,8 @@ void render_camera(texture_system *ts, map m, camera cam) {
 	for (int x = 0; x < m.width; x++) {
 		for (int y = 0; y < m.height; y++) {
 			block_type type = get_block_type(x, y, m);
-			draw_texture_animated(type, x * ts->texture_size, y * ts->texture_size, ts);
+			texture tex = ts->curr_textures[type];
+			draw_texture_animated(x * ts->texture_size, y * ts->texture_size, tex, ts);
 		}
 	}
 

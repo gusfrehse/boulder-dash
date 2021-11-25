@@ -41,6 +41,7 @@ void init_game(game_state *game, int width, int height, float zoom,
 	game->cam = create_camera(0, 0, width, height, 0, game->status_bar_height, zoom);
 
 	start_level(game);
+	fprintf(stderr, "Finished initiazing\n");
 }
 
 void start_level(game_state *game) {

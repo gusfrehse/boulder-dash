@@ -3,6 +3,8 @@
 
 #include <allegro5/allegro5.h>
 
+#include "map.h"
+
 typedef enum {
 	T_DIRT,
 	T_ROCK,
@@ -22,6 +24,7 @@ typedef struct {
 	ALLEGRO_BITMAP *atlas;
 	int animation_frames;
 	int texture_size;
+	texture curr_textures[NUM_BLOCKS];
 } texture_system;
 
 void load_texture_system(texture_system *ts, char *atlas_path);

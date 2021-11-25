@@ -49,6 +49,15 @@ void load_texture_system(texture_system *ts, char *atlas_path) {
 		exit(1);
 	}
 
+	ts->curr_textures[DIRT] = T_DIRT;
+	ts->curr_textures[ROCK] =  T_ROCK;
+	ts->curr_textures[ROCKFORD] = T_ROCKFORD;
+	ts->curr_textures[DIAMOND] = T_DIAMOND;
+	ts->curr_textures[AIR] = T_AIR;
+	ts->curr_textures[BRICK] = T_BRICK;
+	ts->curr_textures[STEEL] = T_STEEL;
+	ts->curr_textures[DUST] = T_DUST;
+
 	for (int i = 0; i < T_NUM; i++) {
 		for (int j = 0; j < ts->animation_frames; j++) {
 			ts->textures[i * T_NUM + j] = load_animation_frame(i, j, ts->atlas, ts->texture_size);
@@ -60,7 +69,6 @@ void draw_texture_animated(int x, int y, texture t, texture_system *ts) {
 	double time = al_get_time();
 
 	int frame = ts->animation_frames * fmod(time, 1.0);
-	fprintf(stderr, "DEBUG: frame: %d\n", frame);
 
 	assert(frame < ts->animation_frames);
 
