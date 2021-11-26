@@ -15,6 +15,8 @@ typedef enum {
 	BRICK,
 	STEEL,
 	DUST,
+	CLOSED_EXIT,
+	OPEN_EXIT,
 	NUM_BLOCKS
 } block_type;
 
@@ -22,13 +24,13 @@ typedef enum {
 	HAS_GRAVITY =   0x1,    // Can be push down every update if nothing blocks it.
 	IT_COLLIDES =   0x2,    // Can prevent a block with gravity to fall.
 	IS_UNSTABLE =   0x4,    // In the case of a block with gravity is over it, if 
-												// the above block slips to a side.
+							// the above block slips to a side.
 	IN_MOVEMENT =   0x8,    // If movement have started.
-	IS_PUSHABLE =  0x10,   // If Rockford can push the block.
-	IS_DIGGABLE =  0x20,   // If Rockford can dig/collect the block.
-	HAS_CHANGED =  0x40,   // If the block changed this frame already.
-	UNBREAKABLE =  0x80,   // If the block can be broke (exploded for example).
-	DOES_VANISH = 0x100,   // If the block can be broke (exploded for example).
+	IS_PUSHABLE =  0x10,    // If Rockford can push the block.
+	IS_DIGGABLE =  0x20,    // If Rockford can dig/collect the block.
+	HAS_CHANGED =  0x40,    // If the block changed this frame already.
+	UNBREAKABLE =  0x80,    // If the block can be broke (exploded for example).
+	DOES_VANISH = 0x100,    // If the block can be broke (exploded for example).
 } block_property;
 
 typedef struct {
@@ -40,6 +42,7 @@ typedef struct {
 	block *board;
 	int width, height;
 	int rockford_x, rockford_y;
+	int exit_x, exit_y;
 	int needed_diamonds;
 } map;
 

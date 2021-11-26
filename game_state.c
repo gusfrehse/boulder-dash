@@ -33,6 +33,7 @@ void init_game(game_state *game, int width, int height, float zoom,
 	init_allegro(width, height, game);
 	fprintf(stderr, "Finished loading Allegro.\n");
 	load_map(game, level_path);
+	write_map(stderr, game->curr_map);
 	fprintf(stderr, "Finished loading map.\n");
 	load_texture_system(&game->texture_system, atlas_path);
 	fprintf(stderr, "Finished loading texture system.\n");

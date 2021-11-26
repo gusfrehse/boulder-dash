@@ -59,6 +59,8 @@ void load_texture_system(texture_system *ts, char *atlas_path) {
 	ts->curr_textures[BRICK] = T_BRICK;
 	ts->curr_textures[STEEL] = T_STEEL;
 	ts->curr_textures[DUST] = T_DUST;
+	ts->curr_textures[CLOSED_EXIT] = T_CLOSED_EXIT;
+	ts->curr_textures[OPEN_EXIT] = T_OPEN_EXIT;
 
 	for (int i = 0; i < T_NUM; i++) {
 		for (int j = 0; j < ts->animation_frames; j++) {

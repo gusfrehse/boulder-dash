@@ -17,6 +17,8 @@ typedef enum {
 	T_BRICK,
 	T_STEEL,
 	T_DUST,
+	T_CLOSED_EXIT,
+	T_OPEN_EXIT,
 	T_NUM
 } texture;
 
