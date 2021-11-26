@@ -89,3 +89,12 @@ void draw_texture_animated(int x, int y, texture t, texture_system *ts) {
 	al_draw_bitmap(ts->textures[frame * T_NUM + t], x, y, 0);
 }
 
+void destroy_texture_system(texture_system *ts) {
+	for (int i = 0; i < T_NUM * ts->animation_frames; i++) {
+		al_destroy_bitmap(ts->textures[i]);
+	}
+
+	free(ts->textures);
+
+	al_destroy_bitmap(ts->atlas);
+}

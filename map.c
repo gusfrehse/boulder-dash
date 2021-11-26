@@ -244,3 +244,7 @@ void explode_at(int x, int y, map m) {
 		}
 	}
 }
+
+void destroy_map(map *m) {
+	free(m->board);
+}

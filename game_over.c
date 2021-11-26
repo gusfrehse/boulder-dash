@@ -14,17 +14,17 @@ void update_game_over(input_controller *c, game_state* game) {
 	}
 
 	if (c->key[ALLEGRO_KEY_LEFT] || c->key[ALLEGRO_KEY_A]) {
-		al_play_sample(game->samples[SELECTION], 1.0f, 0.0f, 1.0f, ALLEGRO_PLAYMODE_ONCE, NULL);
+		play_sample(SELECTION, &game->sample_system);
 		game->selection = 0;
 	}
 
 	if (c->key[ALLEGRO_KEY_RIGHT] || c->key[ALLEGRO_KEY_D]) {
-		al_play_sample(game->samples[SELECTION], 1.0f, 0.0f, 1.0f, ALLEGRO_PLAYMODE_ONCE, NULL);
+		play_sample(SELECTION, &game->sample_system);
 		game->selection = 1;
 	}
 
 	if (c->key[ALLEGRO_KEY_ENTER]) {
-		al_play_sample(game->samples[SELECTION], 1.0f, 0.0f, 1.0f, ALLEGRO_PLAYMODE_ONCE, NULL);
+		play_sample(SELECTION, &game->sample_system);
 
 		if (game->selection == 0)
 			insert_score(game->score_path, game->curr_score);

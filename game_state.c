@@ -19,16 +19,16 @@
 #include "camera.h"
 #include "score.h"
 #include "texture.h"
+#include "sample.h" 
 
-static ALLEGRO_SAMPLE* load_sample(char *path);
 static void init_allegro(int width, int height, game_state* game);
 static void load_map(game_state *game, char* path);
-static void load_samples(game_state* game);
 static void move_rockford(int x_amount, int y_amount, game_state *game);
 static void reset_map(game_state *game);
 
 void init_game(game_state *game, int width, int height, float zoom,
-				 char *atlas_path, char *level_path, char *score_path) {
+		int concurrent_samples, float volume,char *atlas_path,
+		char *level_path, char *score_path) {
 
 	init_allegro(width, height, game);
 	fprintf(stderr, "Finished loading Allegro.\n");
@@ -36,7 +36,7 @@ void init_game(game_state *game, int width, int height, float zoom,
 	fprintf(stderr, "Finished loading map.\n");
 	load_texture_system(&game->texture_system, atlas_path);
 	fprintf(stderr, "Finished loading texture system.\n");
-	load_samples(game);
+	load_sample_system(&game->sample_system, concurrent_samples, volume);
 	fprintf(stderr, "Finished loading resources.\n");
 
 	game->selection = 0;
@@ -95,44 +95,25 @@ static void load_map(game_state *game, char *path) {
 	fclose(map1);
 }
 
-static void load_samples(game_state* game) {
-	int num_samples = 5;
-	if (!al_reserve_samples(num_samples)) {
-		fprintf(stderr, "ERROR: Could not reserve samples\n");
-		exit(1);
-	}
-	game->samples[FALLING] = load_sample("./resources/falling.wav");
-	game->samples[DIAMOND_PICKUP] = load_sample("./resources/diamond_pickup.wav");
-	game->samples[DIGGING] = load_sample("./resources/digging.wav");
-	game->samples[DEATH] = load_sample("./resources/death.wav");
-	game->samples[SELECTION] = load_sample("./resources/selection.wav");
-}
-
-static ALLEGRO_SAMPLE* load_sample(char *path) {
-	ALLEGRO_SAMPLE *sample = al_load_sample(path);
-	if (!sample) {
-		fprintf(stderr, "ERROR: Could not load sample '%s'.\n", path);
-		exit(1);
-	}
-
-	fprintf(stderr, "Loaded sample '%s'.\n", path);
-
-	return sample;
-}
 
 void destroy_game(game_state *game) {
-	free(game->curr_map.board);
 	al_destroy_font(game->font);
 	al_destroy_display(game->display);
 	al_destroy_timer(game->realtime_timer);
 	al_destroy_timer(game->oldschool_timer);
 	al_destroy_event_queue(game->queue);
+
+
+	// TODO: All these.
+	destroy_sample_system(&game->sample_system);
+	destroy_texture_system(&game->texture_system);
+	destroy_map(&game->curr_map);
+	destroy_map(&game->clean_map);
 }
 
 static void kill_rockford(game_state *game) {
-	// TODO: maybe move to map.h?
 	explode_at(game->curr_map.rockford_x, game->curr_map.rockford_y, game->curr_map);
-	al_play_sample(game->samples[DEATH], 1.0f, 0.0f, 1.0f, ALLEGRO_PLAYMODE_ONCE, NULL);
+	play_sample(DEATH, &game->sample_system);
 
 	reset_map(game);
 
@@ -142,7 +123,6 @@ static void kill_rockford(game_state *game) {
 }
 
 static void apply_physics(int x, int y, game_state *game) {
-	// TODO: Maybe move this to map.h?
 	// If rock over rock -> rock over falls if possible
 	// If rock over dirt -> rock stays
 	// If rock over air -> rock moves down
@@ -187,7 +167,7 @@ static void apply_physics(int x, int y, game_state *game) {
 
 		if (get_block_property(x, y, IN_MOVEMENT, game->curr_map)) {
 			// Fell over something so we play a sound.
-			al_play_sample(game->samples[FALLING], 1.0f, 0.0f, 1.0f, ALLEGRO_PLAYMODE_ONCE, NULL);
+			play_sample(FALLING, &game->sample_system);
 		}
 
 		// In the case it didn't move
@@ -265,10 +245,10 @@ static void move_rockford(int x_amount, int y_amount, game_state *game) {
 	
 		// We can dig the block!
 		if (get_block_type(destx, desty, game->curr_map) == DIAMOND) {
-			al_play_sample(game->samples[DIAMOND_PICKUP], 1.0f, 0.0f, 1.0f, ALLEGRO_PLAYMODE_ONCE, NULL);
+			play_sample(DIAMOND_PICKUP, &game->sample_system);
 			game->curr_diamonds++;
 		} else if(get_block_type(destx, desty, game->curr_map) == DIRT) {
-			al_play_sample(game->samples[DIGGING], 1.0f, 0.0f, 1.0f, ALLEGRO_PLAYMODE_ONCE, NULL);
+			play_sample(DIGGING, &game->sample_system);
 		}
 	
 		set_block_at(game->curr_map.rockford_x, game->curr_map.rockford_y, AIR, game->curr_map);
@@ -278,9 +258,8 @@ static void move_rockford(int x_amount, int y_amount, game_state *game) {
 		game->curr_map.rockford_y = desty;
 	
 	} else if (get_block_property(destx, desty, IS_PUSHABLE, game->curr_map)) {
-		if (destx) {
+		if (destx != 0) {
 			// Check if horizontal (we can't push in the vertical)
-			// TODO : if next block not collides push the block, maybe add random so it seems difficult to push.
 			int pushable_x = destx + x_amount;
 
 			if (get_block_property(pushable_x, desty, IT_COLLIDES, game->curr_map))

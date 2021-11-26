@@ -20,6 +20,9 @@
 #define ATLAS_TEXTURE_H 3 // Number of sprites in a column of the atlas
 #define TEXTURE_SIZE 100 // Number of pixels in one side of a texture
 
+#define CONCURRENT_SAMPLES 6
+#define VOLUME (0.7f)
+
 #define SCORE_FILE_PATH "./resources/score"
 #define LEVEL_FILE_PATH "./resources/level.map"
 #define ATLAS_FILE_PATH "./resources/atlas.png"
@@ -29,14 +32,14 @@ int main(void) {
 
 	// Initializing the main game structure.
 	game_state game;
-	init_game(&game, WIDTH, HEIGHT, ZOOM, ATLAS_FILE_PATH, LEVEL_FILE_PATH, SCORE_FILE_PATH);
+	init_game(&game, WIDTH, HEIGHT, ZOOM, CONCURRENT_SAMPLES, VOLUME, ATLAS_FILE_PATH, LEVEL_FILE_PATH, SCORE_FILE_PATH);
 
 	// Setup the input controller.
 	input_controller controller;
 	reset_input(&controller);
 
-	al_start_timer(game.realtime_timer);   // this timer is the fastest possible.
-	al_start_timer(game.oldschool_timer);  // this one is a lot slower.
+	al_start_timer(game.realtime_timer);   // this timer is 60Hz.
+	al_start_timer(game.oldschool_timer);  // this one is 10Hz.
 
 	while (game.status != SHOULD_QUIT) {
 		al_wait_for_event(game.queue, &event);

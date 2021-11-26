@@ -12,8 +12,7 @@
 #include "camera.h"
 #include "score.h"
 #include "texture.h"
-
-enum samples { FALLING, DIAMOND_PICKUP, DIGGING, DEATH, SELECTION, NUM_SAMPLES};
+#include "sample.h"
 
 enum status { IN_GAME, GAME_OVER, HELP, SHOULD_QUIT };
 
@@ -23,8 +22,8 @@ typedef struct game_state {
 	ALLEGRO_EVENT_QUEUE *queue;
 	ALLEGRO_TIMER *realtime_timer;
 	ALLEGRO_TIMER *oldschool_timer;
-	ALLEGRO_SAMPLE *samples[NUM_SAMPLES];
 
+	sample_system sample_system;
 	texture_system texture_system;
 
 	char *score_path;
@@ -44,8 +43,7 @@ typedef struct game_state {
 	double level_start_time;
 } game_state;
 
-void init_game(game_state *game, int width, int height, float zoom,
-			   char *atlas_path, char *level_path, char *score_path);
+void init_game(game_state *game, int width, int height, float zoom, int concurrent_samples, float volume, char *atlas_path, char *level_path, char *score_path);
 void destroy_game(game_state *game);
 
 void start_level(game_state *game);

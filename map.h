@@ -63,4 +63,6 @@ block_type get_block_type(int x, int y, map m);
 
 void explode_at(int x, int y, map m);
 
+void destroy_map(map *m);
+
 #endif
