@@ -74,6 +74,8 @@ void render_game_over(game_state* game) {
 	al_draw_text(game->font, al_map_rgb(255, 255, 255), game->cam.width * 0.5f, game->cam.height * 0.8f, ALLEGRO_ALIGN_CENTER, "SAVE SCORE?");
 	al_draw_text(game->font, game->selection == 0 ? selection_color : non_selection_color, game->cam.width * 0.33f, game->cam.height * 0.9f, ALLEGRO_ALIGN_CENTER, "YES");
 	al_draw_text(game->font, game->selection == 1 ? selection_color : non_selection_color, game->cam.width * 0.66f, game->cam.height * 0.9f, ALLEGRO_ALIGN_CENTER, "NO");
+
+	free(previous_scores);
 }
 
 

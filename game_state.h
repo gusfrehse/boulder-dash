@@ -43,7 +43,9 @@ typedef struct game_state {
 	double level_start_time;
 } game_state;
 
-void init_game(game_state *game, int width, int height, float zoom, int concurrent_samples, float volume, char *atlas_path, char *level_path, char *score_path);
+void init_game(game_state *game, int width, int height, float zoom,
+		float cam_speed, int concurrent_samples, float volume,
+		char *atlas_path, char *level_path, char *score_path);
 void destroy_game(game_state *game);
 
 void start_level(game_state *game);

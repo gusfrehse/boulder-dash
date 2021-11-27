@@ -27,7 +27,7 @@ static void move_rockford(int x_amount, int y_amount, game_state *game);
 static void reset_map(game_state *game);
 
 void init_game(game_state *game, int width, int height, float zoom,
-		int concurrent_samples, float volume,char *atlas_path,
+		float cam_speed, int concurrent_samples, float volume, char *atlas_path,
 		char *level_path, char *score_path) {
 
 	init_allegro(width, height, game);
@@ -44,7 +44,7 @@ void init_game(game_state *game, int width, int height, float zoom,
 	game->status = IN_GAME;
 	game->status_bar_height = 3 * al_get_font_line_height(game->font);
 	game->score_path = score_path;
-	game->cam = create_camera(0, 0, width, height, 0, game->status_bar_height, zoom);
+	game->cam = create_camera(0, 0, width, height, 0, game->status_bar_height, zoom, cam_speed);
 
 	start_level(game);
 	fprintf(stderr, "Finished initiazing\n");
@@ -60,7 +60,6 @@ void start_level(game_state *game) {
 }
 
 static void init_allegro(int width, int height, game_state* game) {
-	// TODO: These should be moved somewhere else.
 	al_init();
 	al_install_keyboard();
 	al_install_audio();
@@ -98,6 +97,7 @@ static void load_map(game_state *game, char *path) {
 
 
 void destroy_game(game_state *game) {
+	al_uninstall_keyboard();
 	al_destroy_font(game->font);
 	al_destroy_display(game->display);
 	al_destroy_timer(game->realtime_timer);
@@ -105,7 +105,6 @@ void destroy_game(game_state *game) {
 	al_destroy_event_queue(game->queue);
 
 
-	// TODO: All these.
 	destroy_sample_system(&game->sample_system);
 	destroy_texture_system(&game->texture_system);
 	destroy_map(&game->curr_map);
@@ -237,7 +236,6 @@ void update_game(input_controller *c, game_state *game) {
 }
 
 static void move_rockford(int x_amount, int y_amount, game_state *game) {
-	// TODO: move this to map.h
 	int destx = game->curr_map.rockford_x + x_amount;
 	int desty = game->curr_map.rockford_y + y_amount;
 	

@@ -7,7 +7,7 @@
 #include "map.h"
 #include "texture.h"
 
-camera create_camera(int x, int y, int width, int height, int offset_x, int offset_y, float zoom) {
+camera create_camera(int x, int y, int width, int height, int offset_x, int offset_y, float zoom, float speed) {
 	camera cam;
 	cam.pos_x = x;
 	cam.pos_y = y;
@@ -16,6 +16,7 @@ camera create_camera(int x, int y, int width, int height, int offset_x, int offs
 	cam.offset_x = offset_x;
 	cam.offset_y = offset_y;
 	cam.zoom = zoom;
+	cam.speed = speed;
 	return cam;
 }
 
@@ -24,18 +25,19 @@ float lerp(float start, float end, float t) {
 }
 
 void update_camera(int x, int y, float zoom, camera *cam) {
-	float speed = 0.1f; // TODO: make part of struct 
-	cam->pos_x = (lerp(cam->pos_x, x, speed));
-	cam->pos_y = (lerp(cam->pos_y, y, speed));
+	cam->pos_x = (lerp(cam->pos_x, x, cam->speed));
+	cam->pos_y = (lerp(cam->pos_y, y, cam->speed));
+
+	cam->zoom = zoom;
 }
 
 void render_camera(texture_system *ts, map m, camera cam) {
+	ALLEGRO_TRANSFORM original, current;
+
 	al_clear_to_color(al_map_rgb(0, 0, 0));
   
 	// Improves performance by sending the atlas texture only once per frame.
 	al_hold_bitmap_drawing(true);
-
-	ALLEGRO_TRANSFORM original, current;
 
 	// Backup the original transform
 	al_copy_transform(&original, al_get_current_transform());

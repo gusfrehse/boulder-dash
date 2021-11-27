@@ -15,6 +15,7 @@
 #define WIDTH 1024
 #define HEIGHT 576
 #define ZOOM (1.0f)
+#define CAM_SPEED (0.1f)
 
 #define ATLAS_TEXTURE_W 3 // Number of sprites in a line of the atlas
 #define ATLAS_TEXTURE_H 3 // Number of sprites in a column of the atlas
@@ -32,7 +33,7 @@ int main(void) {
 
 	// Initializing the main game structure.
 	game_state game;
-	init_game(&game, WIDTH, HEIGHT, ZOOM, CONCURRENT_SAMPLES, VOLUME, ATLAS_FILE_PATH, LEVEL_FILE_PATH, SCORE_FILE_PATH);
+	init_game(&game, WIDTH, HEIGHT, ZOOM, CAM_SPEED, CONCURRENT_SAMPLES, VOLUME, ATLAS_FILE_PATH, LEVEL_FILE_PATH, SCORE_FILE_PATH);
 
 	// Setup the input controller.
 	input_controller controller;
