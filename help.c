@@ -18,7 +18,7 @@ static const char *help_text =
 void update_help(input_controller *c, game_state *game) {
 	if (c->key[ALLEGRO_KEY_ENTER]) {
 		game->status = IN_GAME;
-		start_level(game);
+		revive_rockford(game);
 	}
 }
 

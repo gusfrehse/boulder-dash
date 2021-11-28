@@ -53,6 +53,8 @@ void write_block(FILE *f, int x, int y, map m);
 map map_from_file(FILE* f);
 map map_from_string(char * map_str);
 
+void open_exit(map m);
+
 void write_map(FILE* f, map m);
 void copy_map(map *dest, map *source);
 

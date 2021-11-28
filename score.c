@@ -28,7 +28,7 @@ score* highest_scores(char *path, int n) {
 }
 
 void insert_score(char *path, score hs) {
-	FILE *f = fopen(path, "r+");
+	FILE *f = fopen(path, "r+b");
 
 	if (!f) {
 		fprintf(stderr, "ERROR: Could not open scores file '%s' for reading and writing.\n", path);
@@ -38,17 +38,18 @@ void insert_score(char *path, score hs) {
 	int test_score;
 
 	while (fscanf(f, "%d %*[^\n] ", &test_score) > 0) {
+		fprintf(stderr, "DEBUG: Comparing %d < %d\n", test_score, hs.score);
 		if (test_score < hs.score)
 			break;
 	}
 
+	// Position that we will write our score at
+	int curr_pos = ftell(f);
+	
 	// End position
 	fseek(f, 0L, SEEK_END);
 	int end_pos = ftell(f);
 
-	// Position that we will write our score at
-	int curr_pos = ftell(f);
-	
 	// The amount of bytes we will have to push back
 	int amount_to_move = end_pos - curr_pos;
 

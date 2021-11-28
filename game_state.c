@@ -20,6 +20,13 @@
 #include "score.h"
 #include "texture.h"
 #include "sample.h" 
+#include "easter_egg.h"
+
+#define INITIAL_LIVES 3
+#define NEEDED_DIAMONDS 3
+#define SCORE_PER_DIAMOND 15
+#define SCORE_PER_SECOND 1
+#define MAX_TIME 60
 
 static void init_allegro(int width, int height, game_state* game);
 static void load_map(game_state *game, char* path);
@@ -51,12 +58,26 @@ void init_game(game_state *game, int width, int height, float zoom,
 }
 
 void start_level(game_state *game) {
-	game->curr_score.score = 0;
 	strcpy(game->curr_score.name, "unknown");
+	game->curr_score.score = 0;
 
 	game->curr_diamonds = 0;
-	game->curr_lives = 3;
+	game->needed_diamonds = NEEDED_DIAMONDS;
+
+	game->curr_lives = INITIAL_LIVES;
+
+	game->score_per_diamond = SCORE_PER_DIAMOND;
+	game->score_per_second = SCORE_PER_SECOND;
+
+	game->max_time = MAX_TIME;
 	game->level_start_time = al_get_time();
+}
+
+void revive_rockford(game_state *game) {
+	game->curr_score.score = 0;
+	game->curr_diamonds = 0;
+	game->level_start_time = al_get_time();
+	reset_map(game);
 }
 
 static void init_allegro(int width, int height, game_state* game) {
@@ -112,14 +133,16 @@ void destroy_game(game_state *game) {
 }
 
 static void kill_rockford(game_state *game) {
+	// TODO: add timer so we actully can see he exploding.
 	explode_at(game->curr_map.rockford_x, game->curr_map.rockford_y, game->curr_map);
 	play_sample(DEATH, &game->sample_system);
-
-	reset_map(game);
 
 	if (!--game->curr_lives)  {// if the lives get to zero it's game over.
 		game->status = GAME_OVER;
 	}
+
+	reset_map(game);
+	revive_rockford(game);
 }
 
 static void apply_physics(int x, int y, game_state *game) {
@@ -218,6 +241,7 @@ void update_physics(game_state *game) {
 }
 
 void update_game(input_controller *c, game_state *game) {
+
 	if (c->key[ALLEGRO_KEY_ESCAPE])
 		game->status = SHOULD_QUIT;
 
@@ -241,13 +265,23 @@ static void move_rockford(int x_amount, int y_amount, game_state *game) {
 	
 	if (get_block_property(destx, desty, IS_DIGGABLE, game->curr_map) ||
 	    !get_block_property(destx, desty, IT_COLLIDES, game->curr_map)) {
-	
 		// We can dig the block!
+
 		if (get_block_type(destx, desty, game->curr_map) == DIAMOND) {
+			// Diamond
 			play_sample(DIAMOND_PICKUP, &game->sample_system);
 			game->curr_diamonds++;
-		} else if(get_block_type(destx, desty, game->curr_map) == DIRT) {
+			game->curr_score.score += game->score_per_diamond;
+
+			if (game->curr_diamonds == game->needed_diamonds) {
+				open_exit(game->curr_map);
+			}
+		} else if (get_block_type(destx, desty, game->curr_map) == DIRT) {
+			// Something else
 			play_sample(DIGGING, &game->sample_system);
+		} else if (get_block_type(destx, desty, game->curr_map) == OPEN_EXIT) {
+			game->status = GAME_END;
+			return; // We don't want to change his position after the game ends
 		}
 	
 		set_block_at(game->curr_map.rockford_x, game->curr_map.rockford_y, AIR, game->curr_map);
@@ -282,7 +316,11 @@ static void move_rockford(int x_amount, int y_amount, game_state *game) {
 void render_status_bar(game_state *game) {
 	char status_str[256];
 
-	al_draw_filled_rectangle(0.0f, 0.0f, game->cam.width, game->status_bar_height, al_map_rgb(100, 100, 100)); 
+	double curr_time = al_get_time();
+	double time_since_level_start = curr_time - game->level_start_time;
+	int time_left = game->max_time - time_since_level_start; 
+
+	al_draw_filled_rectangle(0.0f, 0.0f, game->cam.width, game->status_bar_height, al_map_rgb(0, 0, 0)); 
 
 	sprintf(status_str, "DIAMONDS: %d", game->curr_diamonds);
 	al_draw_text(game->font, al_map_rgb(230, 230, 230), game->cam.width * 0.1f, game->status_bar_height * 1.0f / 3.0f, ALLEGRO_ALIGN_LEFT, status_str);
@@ -290,7 +328,7 @@ void render_status_bar(game_state *game) {
 	sprintf(status_str, "SCORE: %d", game->curr_score.score);
 	al_draw_text(game->font, al_map_rgb(230, 230, 230), game->cam.width * 0.5f, game->status_bar_height * 1.0f / 3.0f, ALLEGRO_ALIGN_CENTER, status_str);
 
-	sprintf(status_str, "LIVES: %d", game->curr_lives);
+	sprintf(status_str, "TIME: %d LIVES: %d", time_left, game->curr_lives);
 	al_draw_text(game->font, al_map_rgb(235, 235, 235), game->cam.width * 0.9f, game->status_bar_height * 1.0f / 3.0f, ALLEGRO_ALIGN_RIGHT, status_str);
 }
 

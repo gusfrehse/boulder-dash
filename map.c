@@ -217,6 +217,10 @@ static char block_char(block_type b) {
 	}
 }
 
+void open_exit(map m) {
+	set_block_at(m.exit_x, m.exit_y, OPEN_EXIT, m);
+}
+
 void write_map(FILE *f, map m) {
   for (int y = 0; y < m.height; y++) {
     for (int x = 0; x < m.width; x++) {

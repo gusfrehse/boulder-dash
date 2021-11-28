@@ -5,6 +5,7 @@
 
 #include "map.h"
 #include "input.h"
+#include "easter_egg.h"
 
 typedef enum {
 	T_DIRT,
@@ -19,6 +20,7 @@ typedef enum {
 	T_DUST,
 	T_CLOSED_EXIT,
 	T_OPEN_EXIT,
+	T_EGG,
 	T_NUM
 } texture;
 
@@ -31,7 +33,7 @@ typedef struct {
 } texture_system;
 
 void load_texture_system(texture_system *ts, char *atlas_path);
-void update_texture_system(input_controller *c, texture_system *ts);
+void update_texture_system(input_controller *c, texture_system *ts, ee_state ee);
 void draw_texture_animated(int x, int y, texture t, texture_system *ts);
 void destroy_texture_system(texture_system *ts);
 

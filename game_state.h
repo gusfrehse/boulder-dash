@@ -14,7 +14,7 @@
 #include "texture.h"
 #include "sample.h"
 
-enum status { IN_GAME, GAME_OVER, HELP, SHOULD_QUIT };
+enum status { IN_GAME, GAME_OVER, GAME_END, HELP, SHOULD_QUIT };
 
 typedef struct game_state {
 	ALLEGRO_DISPLAY *display;
@@ -30,7 +30,7 @@ typedef struct game_state {
 	
 	enum status status;
 
-	int selection; // For gui's (pause, game over)
+	int selection; // For gui's (game end, game over)
 
 	camera cam;
 	map curr_map;
@@ -38,8 +38,12 @@ typedef struct game_state {
 
 	int status_bar_height;
 	score curr_score;
+	int score_per_diamond;
+	int score_per_second;
 	int curr_diamonds;
+	int needed_diamonds;
 	int curr_lives;
+	double max_time;
 	double level_start_time;
 } game_state;
 
@@ -49,6 +53,7 @@ void init_game(game_state *game, int width, int height, float zoom,
 void destroy_game(game_state *game);
 
 void start_level(game_state *game);
+void revive_rockford(game_state *game);
 void update_game(input_controller *c, game_state *game);
 void update_physics(game_state *game);
 void render_status_bar(game_state *game);

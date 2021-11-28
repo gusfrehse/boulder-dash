@@ -8,6 +8,7 @@
 
 #include "map.h"
 #include "input.h"
+#include "easter_egg.h"
 
 static ALLEGRO_BITMAP *load_texture(char *path) {
 	ALLEGRO_BITMAP *texture = al_load_bitmap(path);
@@ -69,7 +70,7 @@ void load_texture_system(texture_system *ts, char *atlas_path) {
 	}
 }
 
-void update_texture_system(input_controller *c, texture_system *ts) {
+void update_texture_system(input_controller *c, texture_system *ts, ee_state ee) {
 
 	// Update rockford texture so it reflect the input.
 	if (c->key[ALLEGRO_KEY_D] || c->key[ALLEGRO_KEY_RIGHT]) {
@@ -79,6 +80,11 @@ void update_texture_system(input_controller *c, texture_system *ts) {
 	} else {
 		ts->curr_textures[ROCKFORD] = T_ROCKFORD;
 	}
+
+	if (is_ee(ee)) {
+		ts->curr_textures[ROCK] = T_EGG;
+	}
+
 }
 
 void draw_texture_animated(int x, int y, texture t, texture_system *ts) {
