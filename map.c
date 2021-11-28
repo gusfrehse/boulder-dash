@@ -100,7 +100,7 @@ block create_block(block_type type) {
 	  b.properties |= IT_COLLIDES | UNBREAKABLE;
 	  break;
 	case OPEN_EXIT:
-	  b.properties |= IS_DIGGABLE;
+	  b.properties |= IS_DIGGABLE | IT_COLLIDES | IS_UNSTABLE;
 	  break;
 	default:
 	  fprintf(stderr, "ERROR: received weird block type \"%s\"\n",
