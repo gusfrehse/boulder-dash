@@ -9,12 +9,14 @@
 #include "game_state.h"
 #include "input.h"
 #include "game_over.h"
+#include "game_end.h"
 #include "help.h"
 #include "camera.h"
+#include "easter_egg.h"
 
 #define WIDTH 1024
 #define HEIGHT 576
-#define ZOOM (1.0f)
+#define ZOOM (3.0f)
 #define CAM_SPEED (0.1f)
 
 #define ATLAS_TEXTURE_W 3 // Number of sprites in a line of the atlas
@@ -39,6 +41,10 @@ int main(void) {
 	input_controller controller;
 	reset_input(&controller);
 
+	// easter egg
+	ee_state ee;
+	init_ee_state(&ee);
+
 	al_start_timer(game.realtime_timer);   // this timer is 60Hz.
 	al_start_timer(game.oldschool_timer);  // this one is 10Hz.
 
@@ -56,9 +62,9 @@ int main(void) {
 					update_camera(game.curr_map.rockford_x, game.curr_map.rockford_y, game.cam.zoom, &game.cam);
 
 					// Update the textures.
-					update_texture_system(&controller, &game.texture_system);
+					update_texture_system(&controller, &game.texture_system, ee);
 
-					// Redering.
+					// Rendering.
 					render_camera(&game.texture_system, game.curr_map, game.cam);
 					render_status_bar(&game);
 				} else if (game.status == GAME_OVER) {
@@ -69,19 +75,31 @@ int main(void) {
 
 					update_help(&controller, &game);
 					render_help(&game);
+				} else if (game.status == GAME_END) {
+					update_game_end(&controller, &game);
+					render_game_end(&game);
 				}
+
+				// Input updating.
+				update_ee_state(&ee, &controller);
+				update_input(&controller);
+
+				// "Apply" the drawing to the screen.
 				al_flip_display();
 			} else if (event.timer.source == game.oldschool_timer) {
 				// We only update here so we get the retro feeling easily.
-				update_physics(&game);
-				update_input(&controller);
-				update_game(&controller, &game);
+				
+				if (game.status == IN_GAME) {
+					update_physics(&game);
+					update_game(&controller, &game);
+				}
+
 			}
 			break;
 		case ALLEGRO_EVENT_DISPLAY_CLOSE:
 				game.status = SHOULD_QUIT;
 				break;
-			}
+		}
 	}
 
 	destroy_game(&game);

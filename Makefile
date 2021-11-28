@@ -1,5 +1,4 @@
-
-OBJS = jogo.o game_state.o input.o map.o camera.o score.o game_over.o help.o texture.o sample.o
+OBJS = jogo.o game_state.o input.o map.o camera.o score.o game_over.o help.o texture.o sample.o easter_egg.o game_end.o
 
 CFLAGS := -Wall -g
 LDFLAGS := -Wall -g
@@ -19,7 +18,7 @@ all : jogo
 
 jogo : $(OBJS)
 
-jogo.o : jogo.c game_state.h input.h camera.h game_over.h help.h
+jogo.o : jogo.c game_state.h input.h camera.h game_over.h help.h easter_egg.h game_end.h
 game_state.o : game_state.h input.h map.h camera.h score.h texture.h sample.h
 input.o : input.h
 map.o : map.h
@@ -29,6 +28,9 @@ game_over.o : game_over.h game_state.h
 help.o : help.h game_state.h
 texture.o : texture.h map.h
 sample.o : sample.h
+easter_egg.o : easter_egg.h
+game_end.o : game_end.h
+
 
 clean : 
 	-rm $(OBJS)
