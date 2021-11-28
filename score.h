@@ -11,7 +11,7 @@ typedef struct {
 /**
  * Reads from a file containing highscores the highest score
  */
-score* highest_scores(char *path, int n);
+score* load_scores(char *path, int n);
 
 
 /**

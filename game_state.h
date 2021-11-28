@@ -37,7 +37,13 @@ typedef struct game_state {
 	map clean_map;
 
 	int status_bar_height;
+
 	score curr_score;
+	score *previous_scores;
+	
+	int num_scores;
+	
+
 	int score_per_diamond;
 	int score_per_second;
 	int curr_diamonds;

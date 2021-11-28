@@ -6,7 +6,7 @@
 #define BUF_SIZE 512
 #define NUM_SCORES 5
 
-score* highest_scores(char *path, int n) {
+score* load_scores(char *path, int n) {
 	FILE *f = fopen(path, "r");
 	if (!f) {
 		fprintf(stderr, "ERROR: Could not open scores file '%s' for reading.\n", path);

@@ -27,6 +27,7 @@
 #define SCORE_PER_DIAMOND 15
 #define SCORE_PER_SECOND 1
 #define MAX_TIME 60
+#define NUM_SCORES 15
 
 static void init_allegro(int width, int height, game_state* game);
 static void load_map(game_state *game, char* path);
@@ -71,6 +72,11 @@ void start_level(game_state *game) {
 
 	game->max_time = MAX_TIME;
 	game->level_start_time = al_get_time();
+
+	game->num_scores = NUM_SCORES;
+	game->previous_scores = load_scores(game->score_path, game->num_scores);
+
+	reset_map(game);
 }
 
 void revive_rockford(game_state *game) {
