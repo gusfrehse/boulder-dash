@@ -54,7 +54,7 @@ void insert_score(char *path, score hs) {
 	int amount_to_move = end_pos - curr_pos;
 
 	// Go back to original position to read the data
-	fseek(f, 0L, curr_pos);
+	fseek(f, curr_pos, SEEK_SET);
 
 	char *buff = calloc(amount_to_move, 1);
 	if (fread(buff, 1, amount_to_move, f) != amount_to_move) {
@@ -63,7 +63,7 @@ void insert_score(char *path, score hs) {
 	}
 
 	// Go back to the original position to write the new data
-	fseek(f, 0L, curr_pos);
+	fseek(f, curr_pos, SEEK_SET);
 	fprintf(f, "%d %s\n", hs.score, hs.name);
 
 	// Write the old data afterwards
