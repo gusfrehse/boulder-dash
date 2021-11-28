@@ -53,15 +53,20 @@ void insert_score(char *path, score hs) {
 	// The amount of bytes we will have to push back
 	int amount_to_move = end_pos - curr_pos;
 
+	// Go back to original position to read the data
+	fseek(f, 0L, curr_pos);
+
 	char *buff = calloc(amount_to_move, 1);
 	if (fread(buff, 1, amount_to_move, f) != amount_to_move) {
 		fprintf(stderr, "ERROR: Could not read score file '%s'\n", path);
 		exit(1);
 	}
 
+	// Go back to the original position to write the new data
 	fseek(f, 0L, curr_pos);
-
 	fprintf(f, "%d %s\n", hs.score, hs.name);
+
+	// Write the old data afterwards
 	fwrite(buff, 1, amount_to_move, f);
 
 	fclose(f);
