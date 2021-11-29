@@ -57,7 +57,7 @@ int main(void) {
 			break;
 		case ALLEGRO_EVENT_TIMER:
 			if (event.timer.source == game.realtime_timer) {
-				if (game.status == IN_GAME) {
+				if (game.status == IN_GAME || game.status == DEATH_ANIMATION) {
 					// Update camera movement.
 					update_camera(game.curr_map.rockford_x, game.curr_map.rockford_y, game.cam.zoom, &game.cam);
 
@@ -90,8 +90,11 @@ int main(void) {
 				// We only update here so we get the retro feeling easily.
 				
 				if (game.status == IN_GAME) {
-					update_physics(&game);
 					update_game(&controller, &game);
+					update_physics(&game);
+				} else if (game.status == DEATH_ANIMATION) {
+					update_physics(&game);
+					update_death_animation(&game);
 				}
 
 			}

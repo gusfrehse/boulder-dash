@@ -40,9 +40,7 @@ void insert_score(char *path, score hs) {
 	int items_scanned;
 
 	while ((items_scanned = fscanf(f, "%d %*[^\n] %n", &test_score, &bytes_scanned)) > 0) {
-		fprintf(stderr, "DEBUG: Comparing %d < %d. Scanned: %d\n", test_score, hs.score, bytes_scanned);
 		if (test_score < hs.score) {
-			fprintf(stderr, "DEBUG: breaking out of loop\n");
 			break;
 		}
 	}

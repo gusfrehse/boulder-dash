@@ -26,8 +26,9 @@
 #define NEEDED_DIAMONDS 3
 #define SCORE_PER_DIAMOND 15
 #define SCORE_PER_SECOND 1
-#define MAX_TIME 60
+#define MAX_TIME 180
 #define NUM_SCORES 15
+#define DEATH_TIME (1.0)
 
 static void init_allegro(int width, int height, game_state* game);
 static void load_map(game_state *game, char* path);
@@ -82,7 +83,6 @@ void start_level(game_state *game) {
 void revive_rockford(game_state *game) {
 	game->curr_score.score = 0;
 	game->curr_diamonds = 0;
-	game->level_start_time = al_get_time();
 	reset_map(game);
 }
 
@@ -142,13 +142,21 @@ static void kill_rockford(game_state *game) {
 	// TODO: add timer so we actully can see he exploding.
 	explode_at(game->curr_map.rockford_x, game->curr_map.rockford_y, game->curr_map);
 	play_sample(DEATH, &game->sample_system);
+	game->status = DEATH_ANIMATION;
+	game->death_animation_start_time = al_get_time();
+}
 
-	if (!--game->curr_lives)  {// if the lives get to zero it's game over.
-		game->status = GAME_OVER;
+void update_death_animation (game_state *game) {
+	if (al_get_time() - game->death_animation_start_time >= DEATH_TIME) {
+		if (!--game->curr_lives)  { // if the lives get to zero it's game over.
+			game->status = GAME_OVER;
+		} else {
+			game->status = IN_GAME;
+		}
+
+		reset_map(game);
+		revive_rockford(game);
 	}
-
-	reset_map(game);
-	revive_rockford(game);
 }
 
 static void apply_physics(int x, int y, game_state *game) {
@@ -247,6 +255,8 @@ void update_physics(game_state *game) {
 }
 
 void update_game(input_controller *c, game_state *game) {
+	if (game->max_time < al_get_time() - game->level_start_time)
+		game->status = GAME_OVER;
 
 	if (c->key[ALLEGRO_KEY_ESCAPE])
 		game->status = SHOULD_QUIT;
@@ -268,6 +278,9 @@ void update_game(input_controller *c, game_state *game) {
 static void move_rockford(int x_amount, int y_amount, game_state *game) {
 	int destx = game->curr_map.rockford_x + x_amount;
 	int desty = game->curr_map.rockford_y + y_amount;
+
+	if (game->status == DEATH_ANIMATION)
+		return;
 	
 	if (get_block_property(destx, desty, IS_DIGGABLE, game->curr_map) ||
 	    !get_block_property(destx, desty, IT_COLLIDES, game->curr_map)) {
@@ -286,6 +299,7 @@ static void move_rockford(int x_amount, int y_amount, game_state *game) {
 			// Something else
 			play_sample(DIGGING, &game->sample_system);
 		} else if (get_block_type(destx, desty, game->curr_map) == OPEN_EXIT) {
+			game->curr_score.score += (game->max_time - (al_get_time() - game->level_start_time)) * game->score_per_second;
 			game->status = GAME_END;
 			return; // We don't want to change his position after the game ends
 		}
@@ -328,7 +342,7 @@ void render_status_bar(game_state *game) {
 
 	al_draw_filled_rectangle(0.0f, 0.0f, game->cam.width, game->status_bar_height, al_map_rgb(0, 0, 0)); 
 
-	sprintf(status_str, "DIAMONDS: %d", game->curr_diamonds);
+	sprintf(status_str, "DIAMONDS: %d / %d", game->curr_diamonds, game->needed_diamonds);
 	al_draw_text(game->font, al_map_rgb(230, 230, 230), game->cam.width * 0.1f, game->status_bar_height * 1.0f / 3.0f, ALLEGRO_ALIGN_LEFT, status_str);
 
 	sprintf(status_str, "SCORE: %d", game->curr_score.score);
