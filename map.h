@@ -6,6 +6,9 @@
 #define MAP_MAX_WIDTH 512  // in blocks, don't include newlines or null bytes
 #define MAP_MAX_HEIGHT 512
 
+/**
+ * Enum of all blocktypes.
+ */
 typedef enum {
 	DIRT,
 	ROCK,
@@ -20,6 +23,9 @@ typedef enum {
 	NUM_BLOCKS
 } block_type;
 
+/**
+ * Properties a block can have.
+ */
 typedef enum {
 	HAS_GRAVITY =   0x1,    // Can be push down every update if nothing blocks it.
 	IT_COLLIDES =   0x2,    // Can prevent a block with gravity to fall.
@@ -33,12 +39,20 @@ typedef enum {
 	DOES_VANISH = 0x100,    // If the block can be broke (exploded for example).
 } block_property;
 
+/**
+ * A block.
+ */
 typedef struct {
 	block_type type;
 	unsigned int properties;
 } block;
 
+
+/**
+ * Map.
+ */
 typedef struct {
+	// Block matrix.
 	block *board;
 	int width, height;
 	int rockford_x, rockford_y;

@@ -7,6 +7,9 @@
 #include "input.h"
 #include "easter_egg.h"
 
+/**
+ * Enum with possible textures.
+ */
 typedef enum {
 	T_DIRT,
 	T_ROCK,
@@ -24,6 +27,10 @@ typedef enum {
 	T_NUM
 } texture;
 
+/**
+ * Texture system struture.
+ * Keeps track of the textures and it's animations, as well as the current texture assigned to each block type.
+ */
 typedef struct {
 	ALLEGRO_BITMAP **textures;
 	ALLEGRO_BITMAP *atlas;
@@ -32,9 +39,24 @@ typedef struct {
 	texture curr_textures[NUM_BLOCKS];
 } texture_system;
 
+/**
+ * Loads the texture system from an atlas.
+ */
 void load_texture_system(texture_system *ts, char *atlas_path);
+
+/**
+ * Updates the texture system based on input. Mostly to change a texture assigned to a block type.
+ */
 void update_texture_system(input_controller *c, texture_system *ts, ee_state ee);
+
+/**
+ * Draw function.
+ */
 void draw_texture_animated(int x, int y, texture t, texture_system *ts);
+
+/**
+ * Deallocate resources used by the texture system.
+ */
 void destroy_texture_system(texture_system *ts);
 
 #endif

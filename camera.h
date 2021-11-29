@@ -24,6 +24,9 @@ typedef struct {
 } camera;
 
 
+/**
+ * Creates a camera from the parameters.
+ */
 camera create_camera(int x, int y, int width, int height, int offset_x, int offset_y, float zoom, float speed);
 
 /**
@@ -32,7 +35,7 @@ camera create_camera(int x, int y, int width, int height, int offset_x, int offs
 void update_camera(int x, int y, float zoom, camera *camera);
 
 /**
- * Render the map based on cam and ts.
+ * Render the map based on a camera and a texture system.
  */
 void render_camera(texture_system *ts, map m, camera cam);
 
