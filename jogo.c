@@ -16,7 +16,7 @@
 
 #define WIDTH 1024
 #define HEIGHT 576
-#define ZOOM (3.0f)
+#define ZOOM (1.0f)
 #define CAM_SPEED (0.1f)
 
 #define ATLAS_TEXTURE_W 3 // Number of sprites in a line of the atlas
@@ -24,7 +24,7 @@
 #define TEXTURE_SIZE 100 // Number of pixels in one side of a texture
 
 #define CONCURRENT_SAMPLES 6
-#define VOLUME (0.7f)
+#define VOLUME (0.3f)
 
 #define SCORE_FILE_PATH "./resources/score"
 #define LEVEL_FILE_PATH "./resources/level.map"

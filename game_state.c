@@ -23,7 +23,6 @@
 #include "easter_egg.h"
 
 #define INITIAL_LIVES 3
-#define NEEDED_DIAMONDS 3
 #define SCORE_PER_DIAMOND 15
 #define SCORE_PER_SECOND 1
 #define MAX_TIME 180
@@ -64,7 +63,6 @@ void start_level(game_state *game) {
 	game->curr_score.score = 0;
 
 	game->curr_diamonds = 0;
-	game->needed_diamonds = NEEDED_DIAMONDS;
 
 	game->curr_lives = INITIAL_LIVES;
 
@@ -265,6 +263,16 @@ void update_game(input_controller *c, game_state *game) {
 		game->status = HELP;
 	}
 
+	float zoom_difference = 0.5;
+
+	if (c->key[ALLEGRO_KEY_MINUS]) {
+		game->cam.zoom *= 1/ (1.0f + zoom_difference);
+	}
+
+	if (c->key[ALLEGRO_KEY_EQUALS]) {
+		game->cam.zoom *= 1.0f + zoom_difference;
+	}
+
 	int h_movement = 0;
 	int v_movement = 0;
 
@@ -292,7 +300,7 @@ static void move_rockford(int x_amount, int y_amount, game_state *game) {
 			game->curr_diamonds++;
 			game->curr_score.score += game->score_per_diamond;
 
-			if (game->curr_diamonds == game->needed_diamonds) {
+			if (game->curr_diamonds == game->curr_map.needed_diamonds) {
 				open_exit(game->curr_map);
 			}
 		} else if (get_block_type(destx, desty, game->curr_map) == DIRT) {
@@ -342,7 +350,7 @@ void render_status_bar(game_state *game) {
 
 	al_draw_filled_rectangle(0.0f, 0.0f, game->cam.width, game->status_bar_height, al_map_rgb(0, 0, 0)); 
 
-	sprintf(status_str, "DIAMONDS: %d / %d", game->curr_diamonds, game->needed_diamonds);
+	sprintf(status_str, "DIAMONDS: %d / %d", game->curr_diamonds, game->curr_map.needed_diamonds);
 	al_draw_text(game->font, al_map_rgb(230, 230, 230), game->cam.width * 0.1f, game->status_bar_height * 1.0f / 3.0f, ALLEGRO_ALIGN_LEFT, status_str);
 
 	sprintf(status_str, "SCORE: %d", game->curr_score.score);
