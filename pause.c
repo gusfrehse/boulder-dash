@@ -1,3 +1,4 @@
+// GRR20203927 Gustavo Silveira Frehse
 #include "pause.h"
 
 void update_pause(input_controller* c, game_state *game) {

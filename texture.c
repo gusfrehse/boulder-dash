@@ -1,3 +1,4 @@
+// GRR20203927 Gustavo Silveira Frehse
 #include "texture.h"
 
 #include <allegro5/keycodes.h>

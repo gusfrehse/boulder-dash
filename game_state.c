@@ -1,3 +1,4 @@
+// GRR20203927 Gustavo Silveira Frehse
 #include "game_state.h"
 
 #include <allegro5/allegro_font.h>

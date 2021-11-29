@@ -1,3 +1,4 @@
+// GRR20203927 Gustavo Silveira Frehse
 #include "input.h"
 #include <allegro5/keycodes.h> 
 

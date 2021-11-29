@@ -1,3 +1,4 @@
+// GRR20203927 Gustavo Silveira Frehse
 #include "sample.h"
 
 #include <allegro5/allegro5.h>

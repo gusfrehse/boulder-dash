@@ -1,3 +1,4 @@
+// GRR20203927 Gustavo Silveira Frehse
 #ifndef GAME_PAUSE_H 
 #define GAME_PAUSE_H 
 

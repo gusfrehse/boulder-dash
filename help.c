@@ -1,3 +1,4 @@
+// GRR20203927 Gustavo Silveira Frehse
 #include "help.h"
 
 #include <allegro5/allegro5.h>
@@ -14,7 +15,12 @@ static const char *help_text =
 	"You have 3 lives at the start.\n" 
 	"Press -/= to decrease/increase the zoom.\n" 
 	"Press Esc at any time to exit.\n"
-	"Press Enter to continue.\n";
+	"Press Enter to continue.\n"
+	"CREDITS"
+	"Made by Gustavo Silveira Frehse in 2021."
+	"There is a easter *EGG*."
+	"GRR20203927";
+
 
 void update_help(input_controller *c, game_state *game) {
 	if (c->key[ALLEGRO_KEY_ENTER]) {

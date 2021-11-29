@@ -1,3 +1,4 @@
+// GRR20203927 Gustavo Silveira Frehse
 #include "game_over.h"
 
 #include <allegro5/allegro5.h>

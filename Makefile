@@ -1,3 +1,4 @@
+# GRR20203927 Gustavo Silveira Frehse
 OBJS = jogo.o game_state.o input.o map.o camera.o score.o game_over.o help.o texture.o sample.o easter_egg.o game_end.o
 
 CFLAGS := -Wall -g

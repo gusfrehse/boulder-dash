@@ -1,3 +1,4 @@
+// GRR20203927 Gustavo Silveira Frehse
 #ifndef GAME_HELP_H
 #define GAME_HELP_H
 
